@@ -23,7 +23,6 @@ const techStack = [
 ];
 
 /* ---------------- CAMERA CONTROLLER ---------------- */
-
 function CameraController({
     target,
     isZoomed,
@@ -53,8 +52,6 @@ function CameraController({
     return null;
 }
 
-/* ---------------- SAMPLE DATA (Replace with MongoDB fetch later) ---------------- */
-
 const sampleBooks = {
     "l1b1-web-dev-0": {
         "name": "JavaScript Foundations",
@@ -65,11 +62,8 @@ const sampleBooks = {
         "tags": ["javascript", "beginner"],
         "pages": [ /* your pages array */ ]
     },
-    // ... all other books you have
-    // You can import this from a separate file or fetch from API
 };
 
-/* ---------------- MAIN PAGE ---------------- */
 
 export default function Home() {
     const router = useRouter();
