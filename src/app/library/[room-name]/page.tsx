@@ -8,11 +8,10 @@ import BookIndexPanel from "@/components/custom/BookIndexPanel";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import * as THREE from "three";
-import Flipbook from "../../flipbook/page";
-import Navbar from "@/components/custom/navbar";
+import Flipbook from "../../../components/custom/flippage";
+// import Navbar from "@/components/custom/navbar";
 import { Button } from "@/components/ui/button";
 
-/* ---------------- TECH STACK (Languages) ---------------- */
 
 const techStack = [
     { name: "JavaScript", color: "#f7df1e" },
