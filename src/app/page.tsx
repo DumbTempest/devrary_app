@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
+import Navbar from "@/components/custom/navbar";
 import { motion } from "framer-motion";
 import * as THREE from "three";
 
@@ -45,6 +46,7 @@ export default function Home() {
       transition={{ duration: 0.8 }}
       className="h-screen w-full bg-[#FAF3E1] p-10 font-tektur overflow-hidden"
     >
+      <Navbar />
 
       <div className="grid grid-cols-2 gap-16 items-start">
 
