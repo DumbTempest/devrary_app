@@ -311,10 +311,8 @@ export default function Shelf({
                 const roomName = (window.location.pathname.split("/").pop() || "unknown-room")
                     .replace(/\s+/g, "");
                 const parentGroup = outer.parent as THREE.Group;
-                const meshIndex = bookGroups.findIndex(
-                    (g) => g.name === parentGroup.name
-                );
-                const generatedId = `${parentGroup.name}-${roomName}-${index}-${meshIndex}`;
+                const meshIndex = (parseInt(parentGroup.name.split("")[1])-1)*24+parseInt(parentGroup.name.split("")[3]);
+                const generatedId = `${parentGroup.name.toLowerCase()}-${roomName}-${index}`;
 
                 setInnerMesh(inner);
                 setOuterMesh(outer);
@@ -345,7 +343,7 @@ export default function Shelf({
                     console.log("Opened Book ID:", generatedId);
                     console.log(
                         "All IDs on this shelf:",
-                        bookGroups.map((g, i) => `${g.name}-${roomName}-${index}-${i}`)
+                        bookGroups.map((g, i) => `${g.name}-${roomName}-${index}`)
                     );
                 }
             }
