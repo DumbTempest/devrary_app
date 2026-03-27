@@ -1,37 +1,51 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/custom/navbar";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import webDevData from "../../../config.json";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
+  const [results, setResults] = useState<any[]>([]);
   const router = useRouter();
 
-  const results = useMemo(() => {
-    if (!query.trim()) return [];
+  const handleSearch = async () => {
+  if (!query.trim()) {
+    setResults([]);
+    return;
+  }
 
-    const lower = query.toLowerCase();
+  const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
 
-    return Object.entries(webDevData).filter(([id, book]) => {
-      return (
-        book.name.toLowerCase().includes(lower) ||
-        book.description.toLowerCase().includes(lower) ||
-        book.author.toLowerCase().includes(lower)
-      );
-    });
+  const data = await res.json();
+
+  if (!res.ok) {
+    console.error("Search error:", data.error);
+    return;
+  }
+
+  setResults(data);
+};
+
+  // 🔥 Auto search while typing
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      handleSearch();
+    }, 400);
+
+    return () => clearTimeout(delay);
   }, [query]);
 
   const handleNavigate = (id: string) => {
-    // Extract shelf index from id (format: groupXXXXX-web-dev-4-54)
     const parts = id.split("-");
-const shelfIndex = parts[parts.length - 2]; // ✅ always correct
+    const shelfIndex = parts[parts.length - 2];
 
-    router.push(`/library/web-dev?shelf=${Number(shelfIndex) + 1}&bookId=${id}`);
+    router.push(
+      `/library/web-dev?shelf=${Number(shelfIndex) + 1}&bookId=${id}`
+    );
   };
 
   return (
@@ -77,6 +91,7 @@ const shelfIndex = parts[parts.length - 2]; // ✅ always correct
             </div>
 
             <Button
+              onClick={handleSearch}
               className="
                 bg-[#FF6D1F]
                 text-white
@@ -94,10 +109,10 @@ const shelfIndex = parts[parts.length - 2]; // ✅ always correct
           {/* Results */}
           {results.length > 0 && (
             <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-              {results.map(([id, book]) => (
+              {results.map((book) => (
                 <div
-                  key={id}
-                  onClick={() => handleNavigate(id)}
+                  key={book._id}
+                  onClick={() => handleNavigate(book._id)}
                   className="
                     cursor-pointer
                     bg-white
