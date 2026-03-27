@@ -126,23 +126,34 @@ export default function Flipbook({ bookId }: { bookId: string }) {
   const flipBookRef = useRef<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [speaking, setSpeaking] = useState(false);
+  const [bookMeta, setBookData] = useState<BookData | null>(null);
 
-  // Get book data from your config
-  const bookMeta = booksData[bookId] as BookData | undefined;
+  // FETCH
+  useEffect(() => {
+    const fetchBookData = async () => {
+      const res = await fetch(`/api/books/${bookId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setBookData(data);
+      } else {
+        console.error("Failed to fetch book data");
+      }
+    };
+    fetchBookData();
+  }, [bookId]);
 
-  if (!bookMeta) {
-    return (
-      <div className="flex items-center justify-center h-full text-white text-2xl">
-        Book not found: {bookId}
-      </div>
-    );
-  }
-
-  // Load bookmark status
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("bookmarks") || "[]");
     setIsBookmarked(stored.includes(bookId));
   }, [bookId]);
+
+  if (!bookMeta) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
   const toggleBookmark = () => {
     const stored = JSON.parse(localStorage.getItem("bookmarks") || "[]");
@@ -208,11 +219,10 @@ export default function Flipbook({ bookId }: { bookId: string }) {
       <div className="absolute top-6 left-6 z-50">
         <button
           onClick={toggleBookmark}
-          className={`px-5 py-2.5 rounded-xl font-semibold transition ${
-            isBookmarked
-              ? "bg-green-500 text-white"
-              : "bg-blue-500 hover:bg-blue-600 text-white"
-          }`}
+          className={`px-5 py-2.5 rounded-xl font-semibold transition ${isBookmarked
+            ? "bg-green-500 text-white"
+            : "bg-blue-500 hover:bg-blue-600 text-white"
+            }`}
         >
           {isBookmarked ? "✅ Bookmarked" : "🔖 Bookmark"}
         </button>
