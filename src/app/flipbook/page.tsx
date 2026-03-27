@@ -2,69 +2,57 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import HTMLFlipBookBase from "react-pageflip";
-
-const HTMLFlipBook = HTMLFlipBookBase as any;
 import Image from "next/image";
 import booksData from "../../../config.json"
 
-type CoverProps = {
-  title: string;
-  subtitle?: string;
-  author?: string;
-  coverImage?: string;
-  backgroundColor?: string;
-  textColor?: string;
-  isBack?: boolean;
-};
+const HTMLFlipBook = HTMLFlipBookBase as any;
 
 type PageSection = {
-  type: "text" | "list" | "image" | "highlight";
+  type: "text" | "list" | "highlight";
   content: any;
 };
 
-type PageProps = {
-  number: number;
-  title: string;
-  sections: PageSection[];
+type BookData = {
+  name: string;
+  description: string;
+  author: string;
+  duration: string;
+  variant: string;
+  tags: string[];
+  pages: Array<{
+    title: string;
+    sections: PageSection[];
+  }>;
 };
 
-type FlipBookData = {
-  meta: {
-    id: string;
-    category: string;
-    level: "Beginner" | "Intermediate" | "Advanced";
-    totalPages: number;
-  };
-  frontCover: CoverProps;
-  pages: PageProps[];
-  backCover: CoverProps;
-};
+// Default cover image (you can change this)
+const DEFAULT_COVER = "/covers/default-cover.png";
 
-const Cover = React.forwardRef<HTMLDivElement, CoverProps>(
-  ({ title, subtitle, author, coverImage }, ref) => {
+const Cover = React.forwardRef<HTMLDivElement, any>(
+  ({ title, author, coverImage = DEFAULT_COVER }, ref) => {
     return (
       <div
         ref={ref}
         data-density="hard"
-        className="w-[600px] h-[600px] flex flex-col items-center justify-center relative"
+        className="w-[600px] h-[700px] flex flex-col items-center justify-center relative overflow-hidden"
         style={{
           boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
         }}
       >
         <Image
-          src={coverImage || "/covers/go-cover.png"}
+          src={coverImage}
           alt="Book Cover"
           fill
-          className="object-cover rounded"
+          className="object-cover"
         />
-        <div className="bg-black/40 absolute inset-0" />
+        <div className="bg-black/50 absolute inset-0" />
 
-        <div className="relative z-10 text-center px-8 text-white">
-          <h1 className="text-5xl font-bold mb-4">{title}</h1>
-          {subtitle && (
-            <p className="text-xl opacity-90 mb-6">{subtitle}</p>
+        <div className="relative z-10 text-center px-10 text-white">
+          <h1 className="text-5xl font-bold mb-6 tracking-tight">{title}</h1>
+          {author && (
+            <p className="text-xl opacity-90">by {author}</p>
           )}
-          {author && <p className="text-sm opacity-80">{author}</p>}
+          <div className="mt-12 text-sm opacity-75">Web Development Library</div>
         </div>
       </div>
     );
@@ -73,36 +61,36 @@ const Cover = React.forwardRef<HTMLDivElement, CoverProps>(
 
 Cover.displayName = "Cover";
 
-
-const Page = React.forwardRef<HTMLDivElement, PageProps>(
+const Page = React.forwardRef<HTMLDivElement, any>(
   ({ number, title, sections }, ref) => {
     return (
       <div
         ref={ref}
-        className="w-[600px] h-[800px] bg-[#faf8f2] text-neutral-900 flex flex-col relative"
+        className="w-[600px] h-[700px] bg-[#faf8f2] text-neutral-900 flex flex-col relative overflow-hidden"
       >
-        <div className="absolute left-0 top-0 bottom-0 w-14 bg-[#f0ece2]" />
+        {/* Page decoration */}
+        <div className="absolute left-0 top-0 bottom-0 w-12 bg-[#f0ece2]" />
 
-        <div className="flex-1 pl-20 pr-10 pt-14 pb-12 text-[15px] leading-7 font-serif">
-          <h1 className="text-xl font-semibold mb-6">{title}</h1>
+        <div className="flex-1 pl-16 pr-12 pt-16 pb-12 text-[15.5px] leading-relaxed font-serif">
+          <h2 className="text-2xl font-semibold mb-8 border-b border-neutral-300 pb-3">
+            {title}
+          </h2>
 
-          {sections.map((section, idx) => {
+          {sections.map((section: PageSection, idx: number) => {
             switch (section.type) {
               case "text":
                 return (
-                  <p key={idx} className="mb-4">
+                  <p key={idx} className="mb-5 text-neutral-800">
                     {section.content}
                   </p>
                 );
 
               case "list":
                 return (
-                  <ul key={idx} className="list-disc pl-5 mb-4 space-y-1">
-                    {section.content.map(
-                      (item: string, i: number) => (
-                        <li key={i}>{item}</li>
-                      )
-                    )}
+                  <ul key={idx} className="list-disc pl-6 mb-6 space-y-1.5 text-neutral-800">
+                    {section.content.map((item: string, i: number) => (
+                      <li key={i}>{item}</li>
+                    ))}
                   </ul>
                 );
 
@@ -110,7 +98,7 @@ const Page = React.forwardRef<HTMLDivElement, PageProps>(
                 return (
                   <pre
                     key={idx}
-                    className="bg-neutral-900 text-green-400 p-4 rounded mb-4 text-xs overflow-auto"
+                    className="bg-neutral-900 text-emerald-400 p-5 rounded-lg mb-6 text-sm overflow-auto font-mono border border-neutral-700"
                   >
                     {section.content}
                   </pre>
@@ -122,7 +110,8 @@ const Page = React.forwardRef<HTMLDivElement, PageProps>(
           })}
         </div>
 
-        <div className="absolute bottom-6 right-8 text-xs text-neutral-500">
+        {/* Page Number */}
+        <div className="absolute bottom-6 right-8 text-xs text-neutral-500 font-medium">
           {number}
         </div>
       </div>
@@ -132,20 +121,24 @@ const Page = React.forwardRef<HTMLDivElement, PageProps>(
 
 Page.displayName = "Page";
 
-
-export default function Home({ bookId }: { bookId: string }) {
-  const [bookmarkLoading, setBookmarkLoading] = useState(false);
+export default function Flipbook({ bookId }: { bookId: string }) {
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const bookMeta = booksData[bookId];
+  const flipBookRef = useRef<any>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [speaking, setSpeaking] = useState(false);
+
+  // Get book data from your config
+  const bookMeta = booksData[bookId] as BookData | undefined;
 
   if (!bookMeta) {
     return (
-      <div className="text-white text-xl">
-        Book not found.
+      <div className="flex items-center justify-center h-full text-white text-2xl">
+        Book not found: {bookId}
       </div>
     );
   }
 
+  // Load bookmark status
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("bookmarks") || "[]");
     setIsBookmarked(stored.includes(bookId));
@@ -153,15 +146,12 @@ export default function Home({ bookId }: { bookId: string }) {
 
   const toggleBookmark = () => {
     const stored = JSON.parse(localStorage.getItem("bookmarks") || "[]");
-
     let updated;
 
     if (stored.includes(bookId)) {
-      // Remove bookmark
       updated = stored.filter((id: string) => id !== bookId);
       setIsBookmarked(false);
     } else {
-      // Add bookmark
       updated = [...stored, bookId];
       setIsBookmarked(true);
     }
@@ -169,91 +159,21 @@ export default function Home({ bookId }: { bookId: string }) {
     localStorage.setItem("bookmarks", JSON.stringify(updated));
   };
 
-  const BOOK_DATA: FlipBookData = {
-    meta: {
-      id: bookId,
-      category: "Web Development",
-      level: "Beginner",
-      totalPages: 4,
-    },
-
-    frontCover: {
-      title: bookMeta.name,
-      subtitle: "Web Dev Library",
-      author: bookMeta.author,
-      coverImage: "/covers/default-cover.png",
-    },
-
-    pages: [
-      {
-        number: 1,
-        title: "Overview",
-        sections: [
-          {
-            type: "text",
-            content: bookMeta.description,
-          },
-        ],
-      },
-      {
-        number: 2,
-        title: "About the Author",
-        sections: [
-          {
-            type: "text",
-            content: `${bookMeta.author} is a contributor to the Web Dev Library series.`,
-          },
-        ],
-      },
-      {
-        number: 3,
-        title: "Why This Book Matters",
-        sections: [
-          {
-            type: "list",
-            content: [
-              "Covers essential concepts",
-              "Practical examples",
-              "Structured learning path",
-            ],
-          },
-        ],
-      },
-    ],
-
-    backCover: {
-      title: "End of Preview",
-      subtitle: "Continue Exploring the Library",
-      isBack: true,
-      backgroundColor: "#e5e5e5",
-      textColor: "#111",
-    },
-  };
-
-  const flipBookRef = useRef<any>(null);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [speaking, setSpeaking] = useState(false);
-
   const speakCurrentPage = () => {
     if (!flipBookRef.current) return;
 
-    const page = flipBookRef.current
-      .pageFlip()
-      .getPage(currentPage);
+    const pageFlip = flipBookRef.current.pageFlip();
+    const current = pageFlip.getCurrentPageIndex();
 
-    if (!page) return;
-
-    const text = page.element.innerText;
-    if (!text) return;
+    // This is a simplified version - you can improve text extraction
+    const text = `Page ${current + 1}. ${bookMeta.name}. ${bookMeta.description}`;
 
     speechSynthesis.cancel();
-
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1;
+    utterance.rate = 0.95;
     utterance.pitch = 1;
 
     utterance.onend = () => setSpeaking(false);
-
     setSpeaking(true);
     speechSynthesis.speak(utterance);
   };
@@ -266,43 +186,46 @@ export default function Home({ bookId }: { bookId: string }) {
   return (
     <main className="h-screen w-screen bg-black flex items-center justify-center p-4 relative">
 
-  
-      <div className="absolute top-6 right-33 z-50">
+      {/* Top Controls */}
+      <div className="absolute top-6 right-6 z-50 flex gap-3">
         {!speaking ? (
           <button
             onClick={speakCurrentPage}
-            className="px-4 py-2 bg-yellow-400 text-black rounded-lg font-semibold"
+            className="px-5 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-black rounded-xl font-semibold transition"
           >
-            🔊 Read Page
+            🔊 Read Aloud
           </button>
         ) : (
           <button
             onClick={stopSpeaking}
-            className="px-4 py-2 bg-red-500 text-white rounded-lg font-semibold"
+            className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition"
           >
             ⏹ Stop
           </button>
         )}
       </div>
+
       <div className="absolute top-6 left-6 z-50">
         <button
           onClick={toggleBookmark}
-          className={`px-4 py-2 rounded-lg font-semibold transition ${isBookmarked
+          className={`px-5 py-2.5 rounded-xl font-semibold transition ${
+            isBookmarked
               ? "bg-green-500 text-white"
-              : "bg-blue-500 text-white hover:bg-blue-600"
-            }`}
+              : "bg-blue-500 hover:bg-blue-600 text-white"
+          }`}
         >
-          {isBookmarked ? "✅ Bookmarked" : "🔖 Add Bookmark"}
+          {isBookmarked ? "✅ Bookmarked" : "🔖 Bookmark"}
         </button>
       </div>
 
+      {/* Flipbook */}
       <HTMLFlipBook
         ref={flipBookRef}
         width={600}
         height={700}
         size="fixed"
         drawShadow
-        flippingTime={800}
+        flippingTime={900}
         showCover
         mobileScrollSupport
         onFlip={(e: any) => {
@@ -311,18 +234,30 @@ export default function Home({ bookId }: { bookId: string }) {
           setSpeaking(false);
         }}
       >
-        <Cover {...BOOK_DATA.frontCover} />
+        {/* Front Cover */}
+        <Cover
+          title={bookMeta.name}
+          author={bookMeta.author}
+          coverImage="/covers/default-cover.png"
+        />
 
-        {BOOK_DATA.pages.map((page) => (
+        {/* Dynamic Pages from your data */}
+        {bookMeta.pages.map((page, index) => (
           <Page
-            key={page.number}
-            number={page.number}
+            key={index}
+            number={index + 1}
             title={page.title}
             sections={page.sections}
           />
         ))}
 
-        <Cover {...BOOK_DATA.backCover} />
+        {/* Back Cover */}
+        <Cover
+          title="The End"
+          subtitle={`Thank you for reading ${bookMeta.name}`}
+          author={bookMeta.author}
+          coverImage="/covers/default-cover.png"
+        />
       </HTMLFlipBook>
     </main>
   );

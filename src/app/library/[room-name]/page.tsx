@@ -12,7 +12,7 @@ import Flipbook from "../../flipbook/page";
 import Navbar from "@/components/custom/navbar";
 import { Button } from "@/components/ui/button";
 
-/* ---------------- TECH STACK ---------------- */
+/* ---------------- TECH STACK (Languages) ---------------- */
 
 const techStack = [
     { name: "JavaScript", color: "#f7df1e" },
@@ -54,6 +54,22 @@ function CameraController({
     return null;
 }
 
+/* ---------------- SAMPLE DATA (Replace with MongoDB fetch later) ---------------- */
+
+const sampleBooks = {
+    "l1b1-web-dev-0": {
+        "name": "JavaScript Foundations",
+        "description": "A beginner-friendly introduction to variables, functions, loops, and core JavaScript concepts.",
+        "author": "Alex Carter",
+        "duration": "4 hours",
+        "variant": "thick",
+        "tags": ["javascript", "beginner"],
+        "pages": [ /* your pages array */ ]
+    },
+    // ... all other books you have
+    // You can import this from a separate file or fetch from API
+};
+
 /* ---------------- MAIN PAGE ---------------- */
 
 export default function Home() {
@@ -68,38 +84,45 @@ export default function Home() {
         return decodeURIComponent(last || "library");
     })();
 
-    const roomDisplayName =
-        roomSlug === "library"
-            ? "Library"
-            : roomSlug
-                .split("-")
-                .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                .join(" ");
+    const roomDisplayName = roomSlug === "library"
+        ? "Library"
+        : roomSlug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 
     const [overlayColor, setOverlayColor] = useState<string | null>(null);
     const [resetSignal, setResetSignal] = useState(0);
     const [activeBookId, setActiveBookId] = useState<string | null>(null);
+    const [currentShelfBooks, setCurrentShelfBooks] = useState<any[]>([]);
 
     const shelfFromUrl = searchParams.get("shelf");
     const bookIdFromUrl = searchParams.get("bookId");
 
-    const initialIndex =
-        shelfFromUrl !== null ? Number(shelfFromUrl) - 1 : null;
+    const initialIndex = shelfFromUrl !== null ? Number(shelfFromUrl) - 1 : null;
 
-    const [selectedIndex, setSelectedIndex] =
-        useState<number | null>(initialIndex);
+    const [selectedIndex, setSelectedIndex] = useState<number | null>(initialIndex);
+
+    // Load books when shelf is selected
+    useEffect(() => {
+        if (selectedIndex !== null) {
+            // TODO: Replace with real MongoDB query later
+            // Example: fetch(`/api/books?domain=web-dev&shelfId=${selectedIndex}`)
+
+            const booksForShelf = Object.entries(sampleBooks)
+                .filter(([id]) => id.endsWith(`-web-dev-${selectedIndex}`))
+                .map(([id, book]) => ({ id, ...book }));
+
+            setCurrentShelfBooks(booksForShelf);
+        } else {
+            setCurrentShelfBooks([]);
+        }
+    }, [selectedIndex]);
 
     useEffect(() => {
         setActiveBookId(bookIdFromUrl ?? null);
     }, [bookIdFromUrl]);
 
     const shelves: [number, number, number][] = [
-        [-4, 0, -2],
-        [0, 0, -2],
-        [4, 0, -2],
-        [-4, 0, 2],
-        [0, 0, 2],
-        [4, 0, 2],
+        [-4, 0, -2], [0, 0, -2], [4, 0, -2],
+        [-4, 0, 2],  [0, 0, 2],  [4, 0, 2],
     ];
 
     const handleSelect = (index: number) => {
@@ -107,23 +130,18 @@ export default function Home() {
         router.push(`/library/${roomSlug}?shelf=${index + 1}`);
     };
 
-    const handleBookOpen = useCallback(
-        (bookId: string, color: string) => {
-            setOverlayColor(color);
-            setActiveBookId(bookId);
-            if (shelfFromUrl) {
-                router.push(
-                    `/library/${roomSlug}?shelf=${shelfFromUrl}&bookId=${bookId}`
-                );
-            }
-        },
-        [shelfFromUrl, roomSlug, router]
-    );
+    const handleBookOpen = useCallback((bookId: string, color: string) => {
+        setOverlayColor(color);
+        setActiveBookId(bookId);
+        if (shelfFromUrl) {
+            router.push(`/library/${roomSlug}?shelf=${shelfFromUrl}&bookId=${bookId}`);
+        }
+    }, [shelfFromUrl, roomSlug, router]);
 
     const handleBookClose = useCallback(() => {
         setOverlayColor(null);
         setActiveBookId(null);
-        setResetSignal((prev) => prev + 1);
+        setResetSignal(prev => prev + 1);
         if (shelfFromUrl) {
             router.push(`/library/${roomSlug}?shelf=${shelfFromUrl}`);
         }
@@ -133,42 +151,32 @@ export default function Home() {
         setOverlayColor(null);
         setActiveBookId(null);
         setSelectedIndex(null);
-        setResetSignal((prev) => prev + 1);
+        setResetSignal(prev => prev + 1);
         router.push(`/library/${roomSlug}`);
     }, [roomSlug, router]);
-
-    /* ---------------- SMART BACK LOGIC ---------------- */
 
     const handleSmartBack = useCallback(() => {
         if (activeBookId) {
             handleBookClose();
             return;
         }
-
         if (selectedIndex !== null) {
             handleReset();
             return;
         }
-
         router.push("/room");
-    }, [
-        activeBookId,
-        selectedIndex,
-        handleBookClose,
-        handleReset,
-        router,
-    ]);
+    }, [activeBookId, selectedIndex, handleBookClose, handleReset, router]);
 
-    const backLabel = activeBookId
-        ? "Close Book"
-        : selectedIndex !== null
-            ? "Back to Library"
+    const backLabel = activeBookId 
+        ? "Close Book" 
+        : selectedIndex !== null 
+            ? "Back to Library" 
             : "Back to Rooms";
 
     return (
         <main className="absolute h-screen w-screen bg-[#FAF3E1] overflow-hidden">
 
-            
+            {/* Back Button */}
             <div className="absolute bottom-0 right-0 mb-10 mr-10 z-50">
                 <Button
                     onClick={handleSmartBack}
@@ -178,7 +186,7 @@ export default function Home() {
                 </Button>
             </div>
 
-         
+            {/* Room Title */}
             <div className="absolute top-6 left-8 z-50 pointer-events-none">
                 <h1 className="text-white text-3xl font-semibold tracking-wide drop-shadow-lg font-tektur">
                     {roomDisplayName}
@@ -190,25 +198,14 @@ export default function Home() {
                 orthographic
                 camera={{ position: [10, 10, 10], zoom: 90 }}
                 onPointerMissed={() => {
-                    if (activeBookId) {
-                        handleBookClose();
-                    } else if (selectedIndex !== null) {
-                        handleReset();
-                    }
+                    if (activeBookId) handleBookClose();
+                    else if (selectedIndex !== null) handleReset();
                 }}
             >
                 <hemisphereLight intensity={0.4} />
-                <directionalLight
-                    position={[10, 15, 10]}
-                    intensity={1.2}
-                    castShadow
-                />
+                <directionalLight position={[10, 15, 10]} intensity={1.2} castShadow />
 
-                <mesh
-                    rotation={[-Math.PI / 2, 0, 0]}
-                    position={[0, -0.01, 0]}
-                    receiveShadow
-                >
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
                     <meshStandardMaterial color="#1e293b" />
                 </mesh>
 
@@ -229,11 +226,7 @@ export default function Home() {
                 </Suspense>
 
                 <CameraController
-                    target={
-                        selectedIndex !== null
-                            ? new THREE.Vector3(...shelves[selectedIndex])
-                            : null
-                    }
+                    target={selectedIndex !== null ? new THREE.Vector3(...shelves[selectedIndex]) : null}
                     isZoomed={selectedIndex !== null}
                 />
 
@@ -246,8 +239,15 @@ export default function Home() {
                 />
             </Canvas>
 
-            {selectedIndex !== null && <BookIndexPanel />}
+            {/* Book Index Panel - Pass current shelf books */}
+            {selectedIndex !== null && (
+                <BookIndexPanel 
+                    books={currentShelfBooks} 
+                    onBookOpen={handleBookOpen} 
+                />
+            )}
 
+            {/* Book Overlay */}
             <AnimatePresence>
                 {activeBookId && (
                     <>
@@ -256,7 +256,6 @@ export default function Home() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            transition={{ duration: 0.3 }}
                             className="absolute inset-0 z-40 bg-black/50"
                             onClick={handleBookClose}
                         />
@@ -266,7 +265,6 @@ export default function Home() {
                             initial={{ opacity: 0, scale: 0.92, y: 24 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.92, y: 24 }}
-                            transition={{ duration: 0.35, ease: "easeOut" }}
                             className="absolute z-50 inset-0 flex items-center justify-center pointer-events-none"
                         >
                             <div
@@ -277,15 +275,12 @@ export default function Home() {
                                 <button
                                     onClick={handleBookClose}
                                     className="absolute top-6 right-5 z-10 text-white/70 hover:text-white text-2xl font-light transition-colors"
-                                    aria-label="Close book"
                                 >
                                     ✕
                                 </button>
 
                                 <div className="w-full h-full">
-                                    {activeBookId && (
-                                        <Flipbook bookId={activeBookId} />
-                                    )}
+                                    {activeBookId && <Flipbook bookId={activeBookId} />}
                                 </div>
                             </div>
                         </motion.div>
