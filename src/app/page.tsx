@@ -14,7 +14,7 @@ import * as THREE from "three";
 /* ---------------- MODEL ---------------- */
 
 function Model() {
-  const { scene } = useGLTF("/models/model1.glb");
+  const { scene } = useGLTF("/models/bookshelf.glb");
   const modelRef = useRef<THREE.Group>(null);
 
   // Auto rotation

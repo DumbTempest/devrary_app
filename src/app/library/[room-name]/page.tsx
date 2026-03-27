@@ -296,4 +296,4 @@ export default function Home() {
     );
 }
 
-useGLTF.preload("/models/model1.glb");
+useGLTF.preload("/models/bookshelf.glb");

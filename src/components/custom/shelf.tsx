@@ -84,7 +84,7 @@ export default function Shelf({
     labelColor: string;
     resetSignal: number;
 }) {
-    const { scene } = useGLTF("/models/model1.glb");
+    const { scene } = useGLTF("/models/bookshelf.glb");
     const groupRef = useRef<THREE.Group>(null);
     const textRef = useRef<any>(null);
     const bannerGroupRef = useRef<THREE.Group>(null);
@@ -380,4 +380,4 @@ export default function Shelf({
     );
 }
 
-useGLTF.preload("/models/model1.glb");
+useGLTF.preload("/models/bookshelf.glb");
