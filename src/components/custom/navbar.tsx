@@ -55,7 +55,7 @@ export default function Navbar() {
           Home
         </Button>
       </Link>
-      <Link href="books/search">
+      <Link href="/books/search">
         <Button
           className="
                 bg-[#FF6D1F]
@@ -75,7 +75,7 @@ export default function Navbar() {
         </Button>
       </Link>
       {status === "authenticated" && (
-      <Link href="books/bookmarks">
+      <Link href="/books/bookmarks">
         <Button
           className="
                 bg-[#FF6D1F]
@@ -179,7 +179,7 @@ export default function Navbar() {
                 Profile
               </button>
               <button
-                onClick={() => router.push("/books/create")}
+                onClick={() => router.push("//books/create")}
                 className="
                   w-full text-left px-4 py-3
                   font-bold
