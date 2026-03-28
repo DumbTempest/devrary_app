@@ -4,10 +4,12 @@ import Link from "next/link";
 import { Button } from "../ui/button";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 export default function Navbar() {
   const { status, data: session } = useSession();
+  const router = useRouter();
 
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -163,6 +165,17 @@ export default function Navbar() {
               z-50
             "
             >
+              <button
+                onClick={() => router.push("/create")}
+                className="
+                  w-full text-left px-4 py-3
+                  font-bold
+                  hover:bg-[#FF6D1F] hover:text-white
+                  transition-all
+                "
+              >
+                Create Books
+              </button>
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
                 className="

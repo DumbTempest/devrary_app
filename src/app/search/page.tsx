@@ -6,29 +6,38 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/custom/navbar";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {
-  if (!query.trim()) {
-    setResults([]);
-    return;
-  }
+    if (!query.trim()) {
+      setResults([]);
+      return;
+    }
 
-  const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+    setLoading(true);
 
-  const data = await res.json();
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
 
-  if (!res.ok) {
-    console.error("Search error:", data.error);
-    return;
-  }
+      if (!res.ok) {
+        console.error("Search error:", data.error);
+        return;
+      }
 
-  setResults(data);
-};
+      setResults(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // 🔥 Auto search while typing
   useEffect(() => {
@@ -106,45 +115,73 @@ export default function SearchPage() {
             </Button>
           </div>
 
-          {/* Results */}
-          {results.length > 0 && (
-            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-              {results.map((book) => (
-                <div
-                  key={book._id}
-                  onClick={() => handleNavigate(book._id)}
-                  className="
-                    cursor-pointer
-                    bg-white
-                    border-4 border-[#222222]
-                    rounded-2xl
-                    shadow-[6px_6px_0px_0px_#222222]
-                    p-5
-                    hover:translate-x-1
-                    hover:translate-y-1
-                    hover:shadow-none
-                    transition-all
-                  "
-                >
-                  <div className="font-bold text-lg text-[#222222]">
-                    {book.name}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {book.author}
-                  </div>
-                  <div className="text-sm text-gray-500 mt-2 line-clamp-2">
-                    {book.description}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {query && results.length === 0 && (
-            <div className="text-center text-gray-600 mt-4">
-              No results found.
-            </div>
-          )}
+          <AnimatePresence mode="wait">
+            {loading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex justify-center items-center py-10"
+              >
+                <motion.div
+                  className="w-10 h-10 border-4 border-[#222222] border-t-transparent rounded-full"
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+                />
+              </motion.div>
+            ) : results.length > 0 ? (
+              <motion.div
+                key="results"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-4 max-h-[400px] overflow-y-auto pr-2"
+              >
+                {results.map((book, i) => (
+                  <motion.div
+                    key={book._id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    onClick={() => handleNavigate(book._id)}
+                    className="
+            cursor-pointer
+            bg-white
+            border-4 border-[#222222]
+            rounded-2xl
+            shadow-[6px_6px_0px_0px_#222222]
+            p-5
+            hover:translate-x-1
+            hover:translate-y-1
+            hover:shadow-none
+            transition-all
+          "
+                  >
+                    <div className="font-bold text-lg text-[#222222]">
+                      {book.name}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {book.author}
+                    </div>
+                    <div className="text-sm text-gray-500 mt-2 line-clamp-2">
+                      {book.description}
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            ) : query ? (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-center text-gray-600 mt-4"
+              >
+                No results found.
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </Card>
       </div>
     </main>
