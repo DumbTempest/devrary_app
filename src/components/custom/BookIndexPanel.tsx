@@ -1,7 +1,7 @@
 "use client";
 
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import webDevData from "../../../config.json";
+import { useSearchParams } from "next/navigation";
+import defautBook from "../../app/api/books/[bookID]/defaultBook.json";
 import { motion } from "framer-motion";
 
 
@@ -32,7 +32,7 @@ export default function BookIndexPanel({
   const shelfBooks =
     books && books.length > 0
       ? books.map((book) => [book._id, book] as const)
-      : Object.entries(webDevData)
+      : Object.entries(defautBook)
           .filter(([id]) => {
             const parts = id.split("-");
             const shelfId = parts[parts.length - 1]; // last part = shelf index
@@ -61,20 +61,20 @@ export default function BookIndexPanel({
       transition={{ duration: 0.3 }}
       className="
         absolute right-10 top-28
-        w-[450px] max-h-[70vh] overflow-y-auto
+        w-[400px] max-h-[66vh] overflow-y-auto
         bg-[#F5E7C6]
         border-4 border-[#222222]
         rounded-[30px]
         shadow-[10px_10px_0px_0px_#222222]
-        p-8
+        p-6
         z-50
       "
     >
-      <h2 className="text-2xl font-bold text-[#222222] mb-6 text-center">
+      <h2 className="text-xl font-bold text-[#222222] mb-5 text-center">
         Shelf {shelf} Index
       </h2>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {shelfBooks.map(([id, data], index) => {
           const isActive = id === currentBookId;
 
@@ -83,7 +83,7 @@ export default function BookIndexPanel({
               key={id}
               onClick={() => handleOpenBook(id)}
               className={`
-                p-4
+                p-3
                 rounded-2xl
                 border-4 border-[#222222]
                 transition-all
@@ -94,7 +94,7 @@ export default function BookIndexPanel({
                 }
               `}
             >
-              <div className="font-bold text-lg">
+              <div className="font-bold text-base">
                 {index + 1}. {data?.name || id}
               </div>
 

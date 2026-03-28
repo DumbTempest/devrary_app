@@ -1,0 +1,170 @@
+{
+  "_id": "l1b5-web-dev-2",
+  "name": "Go Web Development in Practice",
+  "description": "An intermediate guide to Go covering backend development, concurrency handling, HTTP services, and API integration.",
+  "author": "Siddharth Menon",
+  "duration": "6 hours",
+  "variant": "thick",
+  "tags": [
+    "golang",
+    "web-dev",
+    "backend",
+    "api",
+    "concurrency"
+  ],
+  "pages": [
+    {
+      "title": "Getting Started with Go",
+      "sections": [
+        {
+          "type": "text",
+          "content": "Go is a powerful language for building fast and reliable backend systems."
+        },
+        {
+          "type": "list",
+          "content": [
+            "Compiled language",
+            "Simple syntax",
+            "Fast execution",
+            "Built-in concurrency"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Program Execution Flow",
+      "sections": [
+        {
+          "type": "text",
+          "content": "Go executes programs sequentially but supports concurrency through goroutines."
+        },
+        {
+          "type": "highlight",
+          "content": "fmt.Println(\"Program started\")"
+        }
+      ]
+    },
+    {
+      "title": "Functions & Closures in Go",
+      "sections": [
+        {
+          "type": "text",
+          "content": "Functions in Go can return other functions, enabling closure-like behavior."
+        },
+        {
+          "type": "highlight",
+          "content": "func outer() func() int {\n  x := 5\n  return func() int { return x }\n}"
+        }
+      ]
+    },
+    {
+      "title": "Handling Async Operations",
+      "sections": [
+        {
+          "type": "text",
+          "content": "Go uses goroutines instead of promises to handle asynchronous operations."
+        },
+        {
+          "type": "highlight",
+          "content": "go fetchData()"
+        }
+      ]
+    },
+    {
+      "title": "Goroutines & Synchronization",
+      "sections": [
+        {
+          "type": "text",
+          "content": "Goroutines allow concurrent execution, while sync tools manage coordination."
+        },
+        {
+          "type": "highlight",
+          "content": "var wg sync.WaitGroup\nwg.Add(1)\ngo func(){ defer wg.Done() }()"
+        }
+      ]
+    },
+    {
+      "title": "Event Loop Equivalent in Go",
+      "sections": [
+        {
+          "type": "text",
+          "content": "Go does not have a traditional event loop, but its scheduler manages concurrent execution efficiently."
+        },
+        {
+          "type": "video",
+          "content": "https://www.youtube.com/watch?v=oV9rvDllKEg"
+        }
+      ]
+    },
+    {
+      "title": "Working with Templates (HTML)",
+      "sections": [
+        {
+          "type": "highlight",
+          "content": "tmpl.Execute(w, data)"
+        },
+        {
+          "type": "text",
+          "content": "Go templates allow dynamic rendering of HTML content."
+        }
+      ]
+    },
+    {
+      "title": "Handling User Input",
+      "sections": [
+        {
+          "type": "highlight",
+          "content": "r.FormValue(\"username\")"
+        },
+        {
+          "type": "text",
+          "content": "Go can process form data and user input in web applications."
+        }
+      ]
+    },
+    {
+      "title": "Consuming APIs in Go",
+      "sections": [
+        {
+          "type": "text",
+          "content": "Go can interact with external services using HTTP clients."
+        },
+        {
+          "type": "highlight",
+          "content": "res, _ := http.Get(\"https://api.sampleapis.com/futurama/characters\")"
+        },
+        {
+          "type": "audio",
+          "content": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3"
+        }
+      ]
+    },
+    {
+      "title": "Best Practices for Go Web Apps",
+      "sections": [
+        {
+          "type": "list",
+          "content": [
+            "Use proper error handling",
+            "Avoid global state",
+            "Structure packages cleanly",
+            "Write reusable functions"
+          ]
+        },
+        {
+          "type": "text",
+          "content": "Following best practices ensures maintainable and scalable Go applications."
+        }
+      ]
+    }
+  ],
+  "creator": "admin@example.com",
+  "status": "published",
+  "searchText": "golang web development goroutines concurrency http api templates forms go backend async go scheduler closures functions go web apps guide",
+  "createdAt": {
+    "$date": "2026-03-28T17:59:16.611Z"
+  },
+  "updatedAt": {
+    "$date": "2026-03-28T17:59:16.611Z"
+  }
+}
