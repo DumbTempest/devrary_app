@@ -2,18 +2,23 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import HTMLFlipBookBase from "react-pageflip";
-import Image from "next/image";
-import booksData from "../../../config.json";
+
 import { useSession } from "next-auth/react";
 import { Cover } from "./cover";
 import { Page } from "./page";
 
 const HTMLFlipBook = HTMLFlipBookBase as any;
 
-type PageSection = {
-  type: "text" | "list" | "highlight";
-  content: any;
+type PageSection =
+  | { type: "text"; content: string }
+  | { type: "list"; content: string[] }
+  | { type: "highlight"; content: string }
+  | { type: "video"; content: string }
+  | {
+      type: "audio";
+      content: string | { src: string; title?: string };
 };
+
 
 type BookData = {
   name: string;
