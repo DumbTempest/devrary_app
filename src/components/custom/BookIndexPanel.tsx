@@ -1,42 +1,58 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import webDevData from "../../../config.json";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 
-export default function BookIndexPanel() {
+
+type Book = {
+  _id: string;
+  name?: string;
+  author?: string;
+}
+
+interface BookIndexPanelProps {
+  books: Book[] | null;
+  onBookOpen: (bookId: string, color: string) => void;
+}
+
+export default function BookIndexPanel({
+  books,
+  onBookOpen,
+}: BookIndexPanelProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-
-  const bookId = searchParams.get("bookId");
+  const currentBookId = searchParams.get("bookId");
   const shelf = searchParams.get("shelf");
 
   if (!shelf) return null;
 
-  const shelfBooks = Object.entries(webDevData)
-    .filter(([id]) => {
-      const parts = id.split("-");
-      const shelfId = parts[parts.length - 2];
-      return Number(shelfId) + 1 === Number(shelf);
-    })
-    .sort((a, b) => {
-      const aIndex = Number(a[0].split("-").pop());
-      const bIndex = Number(b[0].split("-").pop());
-      return aIndex - bIndex;
-    });
+  const shelfBooks =
+    books && books.length > 0
+      ? books.map((book) => [book._id, book] as const)
+      : Object.entries(webDevData)
+          .filter(([id]) => {
+            const parts = id.split("-");
+            const shelfId = parts[parts.length - 1]; // last part = shelf index
+            return Number(shelfId) + 1 === Number(shelf);
+          })
+          .sort((a, b) => {
+            const aIndex = Number(a[0].split("-").pop());
+            const bIndex = Number(b[0].split("-").pop());
+            return aIndex - bIndex;
+          });
 
   if (shelfBooks.length === 0) return null;
 
+  // handlers
   const handleOpenBook = (id: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("bookId", id);
-
-    router.push(`${pathname}?${params.toString()}`);
+    const color = "#FF6D1F";
+    onBookOpen(id, color);
   };
 
+  //UI
   return (
     <motion.div
       initial={{ x: 400, opacity: 0 }}
@@ -60,7 +76,7 @@ export default function BookIndexPanel() {
 
       <div className="space-y-4">
         {shelfBooks.map(([id, data], index) => {
-          const isActive = id === bookId;
+          const isActive = id === currentBookId;
 
           return (
             <div
@@ -79,7 +95,7 @@ export default function BookIndexPanel() {
               `}
             >
               <div className="font-bold text-lg">
-                {index + 1}. {data.name}
+                {index + 1}. {data?.name || id}
               </div>
 
               <div
@@ -87,7 +103,7 @@ export default function BookIndexPanel() {
                   isActive ? "text-white/90" : "text-gray-600"
                 }`}
               >
-                {data.author}
+                {data?.author || "Unknown Author"}
               </div>
             </div>
           );
