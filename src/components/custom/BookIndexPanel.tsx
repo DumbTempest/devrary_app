@@ -21,8 +21,8 @@ export default function BookIndexPanel({
   onBookOpen,
 }: BookIndexPanelProps) {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+  //const router = useRouter();
+  //const pathname = usePathname();
 
   const currentBookId = searchParams.get("bookId");
   const shelf = searchParams.get("shelf");
@@ -52,7 +52,7 @@ export default function BookIndexPanel({
     onBookOpen(id, color);
   };
 
-  //UI
+  //ui
   return (
     <motion.div
       initial={{ x: 400, opacity: 0 }}

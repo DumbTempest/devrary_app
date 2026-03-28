@@ -332,67 +332,13 @@ export default function CreatePage() {
                     author: form.author,
                     description: form.description,
                     duration: form.duration,
+                    variant: form.difficulty,
+                    tags: form.tags.split(",").filter(Boolean),
                     pages: pages
                 }}
             />
 
-            {/* Styles */}
-            <style jsx>{`
-    .input {
-  width: 100%;
-  padding: 14px 16px;
-  border: 4px solid #222;
-  border-radius: 14px;
-  background: #fff;
-
-  font-size: 16px;
-  font-weight: 500;
-
-  outline: none;
-  box-shadow: 4px 4px 0px #222;
-
-  transition: all 0.15s ease;
-}
-
-.input:focus {
-  transform: translate(2px, 2px);
-  box-shadow: none;
-}
-
-.label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 700;
-  font-size: 14px;
-  color: #222;
-}
-
-    .label {
-      display: block;
-      margin-bottom: 6px;
-      font-weight: 600;
-      color: #222;
-    }
-
-    .btn-primary {
-      background: #ff6d1f;
-      color: white;
-      border: 4px solid #222;
-      border-radius: 14px;
-      padding: 14px;
-      font-weight: bold;
-      box-shadow: 6px 6px 0 #222;
-    }
-
-    .btn-secondary {
-      background: #fff;
-      border: 3px solid #222;
-      border-radius: 12px;
-      padding: 10px 14px;
-      font-weight: 600;
-      box-shadow: 4px 4px 0 #222;
-    }
-  `}</style>
+           
         </main>
     );
 }
