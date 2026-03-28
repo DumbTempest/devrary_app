@@ -43,7 +43,16 @@ export async function GET(req: Request) {
           }
         }
       },
+
+      // ✅ FILTER OUT DRAFTS
+      {
+        $match: {
+          status: "published"
+        }
+      },
+
       { $limit: 10 },
+
       {
         $project: {
           _id: 1,
