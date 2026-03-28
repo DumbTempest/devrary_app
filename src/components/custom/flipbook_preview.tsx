@@ -17,10 +17,9 @@ type PageSection =
   | { type: "highlight"; content: string }
   | { type: "video"; content: string }
   | {
-    type: "audio";
-    content: string | { src: string; title?: string };
-  };
-
+      type: "audio";
+      content: string | { src: string; title?: string };
+    };
 
 type BookData = {
   name: string;
@@ -37,8 +36,50 @@ type BookData = {
   BackcoverImage?: string;
 };
 
+/* ── Reusable neobrutalist button ── */
+const NeoButton = ({
+  onClick,
+  disabled,
+  title,
+  children,
+  className = "",
+  variant = "primary",
+}: {
+  onClick?: () => void;
+  disabled?: boolean;
+  title?: string;
+  children: React.ReactNode;
+  className?: string;
+  variant?: "primary" | "danger" | "success" | "ghost";
+}) => {
+  const base =
+    "font-bold border-4 border-[#222222] rounded-2xl transition-all duration-100 flex items-center justify-center select-none";
+
+  const variants: Record<string, string> = {
+    primary:
+      "bg-[#FF6D1F] text-white shadow-[4px_4px_0px_0px_#222222] active:translate-x-1 active:translate-y-1 active:shadow-none hover:brightness-110",
+    danger:
+      "bg-[#EF233C] text-white shadow-[4px_4px_0px_0px_#222222] active:translate-x-1 active:translate-y-1 active:shadow-none hover:brightness-110",
+    success:
+      "bg-[#2DC653] text-white shadow-[4px_4px_0px_0px_#222222] active:translate-x-1 active:translate-y-1 active:shadow-none hover:brightness-110",
+    ghost:
+      "bg-white text-[#222222] shadow-[4px_4px_0px_0px_#222222] active:translate-x-1 active:translate-y-1 active:shadow-none hover:bg-[#f5f5f5]",
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      className={`${base} ${variants[variant]} disabled:opacity-30 disabled:cursor-not-allowed disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:active:shadow-[4px_4px_0px_0px_#222222] ${className}`}
+    >
+      {children}
+    </button>
+  );
+};
+
 export function FlipbookPreview({
-  data
+  data,
 }: {
   data: BookData;
 }) {
@@ -50,11 +91,10 @@ export function FlipbookPreview({
   const [totalPages, setTotalPages] = useState(0);
   const [zoom, setZoom] = useState(1);
 
-  // Auto-fit zoom whenever container or book changes
   const computeFit = () => {
     if (!containerRef.current) return;
     const { clientWidth: cw, clientHeight: ch } = containerRef.current;
-    const padding = 96; // room for top/bottom controls
+    const padding = 96;
     const scaleW = cw / BOOK_W;
     const scaleH = (ch - padding) / BOOK_H;
     const fit = parseFloat(Math.min(scaleW, scaleH, 1).toFixed(3));
@@ -66,9 +106,8 @@ export function FlipbookPreview({
     const ro = new ResizeObserver(computeFit);
     if (containerRef.current) ro.observe(containerRef.current);
     return () => ro.disconnect();
-  }, [bookMeta]); // rerun once book data arrives
+  }, [bookMeta]);
 
-  // Ctrl+Scroll wheel zoom
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -84,11 +123,9 @@ export function FlipbookPreview({
     return () => el.removeEventListener("wheel", onWheel);
   }, [bookMeta]);
 
-  // ── Page navigation helpers ──
   const flipNext = () => flipBookRef.current?.pageFlip().flipNext();
   const flipPrev = () => flipBookRef.current?.pageFlip().flipPrev();
 
-  // Keyboard: ←/→ arrows + A/D + Esc to close
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") flipNext();
@@ -100,22 +137,26 @@ export function FlipbookPreview({
 
   useEffect(() => {
     setBookData(data);
-    setTotalPages(data.pages.length + 2); // cover + pages + back cover 
+    setTotalPages(data.pages.length + 2);
   }, [data]);
 
   if (!bookMeta) {
     return (
-      <div className="h-full w-full flex flex-col items-center justify-center gap-3 bg-neutral-950">
-        <div className="w-8 h-8 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
-        <p className="text-neutral-400 text-sm tracking-wide">Loading book…</p>
+      <div className="h-full w-full flex flex-col items-center justify-center gap-4 bg-black/60">
+        <div
+          className="w-14 h-14 border-4 border-[#222222] rounded-2xl bg-[#FF6D1F]
+          animate-bounce shadow-[4px_4px_0px_0px_#222222]"
+        />
+        <p className="text-white text-sm font-bold tracking-widest uppercase border-4 border-[#222222] px-5 py-2 rounded-2xl shadow-[4px_4px_0px_0px_#222222]">
+          Loading book…
+        </p>
       </div>
     );
   }
 
   const speakCurrentPage = () => {
     if (!flipBookRef.current) return;
-    const pageFlip = flipBookRef.current.pageFlip();
-    const current = pageFlip.getCurrentPageIndex();
+    const current = flipBookRef.current.pageFlip().getCurrentPageIndex();
     const text = `Page ${current + 1}. ${bookMeta.name}. ${bookMeta.description}`;
     speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
@@ -134,69 +175,48 @@ export function FlipbookPreview({
   return (
     <main
       ref={containerRef}
-      className="h-full w-full bg-black flex items-center justify-center relative overflow-hidden"
+      className="h-full w-full bg-black/60 flex items-center justify-center relative overflow-hidden rounded-2xl border-4 border-[#222222]"
     >
-
-      {/* ── Top-right: read aloud + close ── */}
-      <div className="absolute top-5 left-5 z-50 flex items-center gap-2 
-  px-3 py-2 rounded-xl 
-  bg-black/40 backdrop-blur-md 
-  border border-white/20 
-  shadow-lg shadow-black/30">
-
-        {/* Read aloud / Stop */}
+      {/* ── Top-left: read aloud ── */}
+      <div className="absolute top-5 left-5 z-50 flex items-center gap-2">
         {!speaking ? (
-          <button
+          <NeoButton
             onClick={speakCurrentPage}
-            className="px-3 py-1.5 rounded-lg font-semibold text-sm transition 
-        bg-white/80 text-black hover:bg-white"
+            variant="ghost"
+            className="px-4 py-2 text-sm"
           >
-            Read
-          </button>
+            🔊 Read
+          </NeoButton>
         ) : (
-          <button
+          <NeoButton
             onClick={stopSpeaking}
-            className="px-3 py-1.5 rounded-lg font-semibold text-sm transition 
-        bg-red-500 text-white hover:bg-red-600"
+            variant="danger"
+            className="px-4 py-2 text-sm"
           >
             ⏹ Stop
-          </button>
+          </NeoButton>
         )}
       </div>
 
       {/* ── Left arrow ── */}
-      <button
+      <NeoButton
         onClick={flipPrev}
         title="Previous page (← or A)"
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-50 group 
-    flex items-center justify-center 
-    w-12 h-20 rounded-2xl 
-    bg-black/30 backdrop-blur-md 
-    border border-white/20 
-    shadow-md shadow-black/30 
-    hover:bg-black/50 transition-all duration-200"
+        variant="primary"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-50 w-12 h-20 text-2xl"
       >
-        <span className="text-white/70 group-hover:text-white text-2xl transition-all duration-200 group-hover:-translate-x-0.5">
-          ‹
-        </span>
-      </button>
+        ‹
+      </NeoButton>
 
       {/* ── Right arrow ── */}
-      <button
+      <NeoButton
         onClick={flipNext}
         title="Next page (→ or D)"
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-50 group 
-    flex items-center justify-center 
-    w-12 h-20 rounded-2xl 
-    bg-black/30 backdrop-blur-md 
-    border border-white/20 
-    shadow-md shadow-black/30 
-    hover:bg-black/50 transition-all duration-200"
+        variant="primary"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-50 w-12 h-20 text-2xl"
       >
-        <span className="text-white/70 group-hover:text-white text-2xl transition-all duration-200 group-hover:translate-x-0.5">
-          ›
-        </span>
-      </button>
+        ›
+      </NeoButton>
 
       {/* ── Scaled flipbook wrapper ── */}
       <div
@@ -222,7 +242,6 @@ export function FlipbookPreview({
             speechSynthesis.cancel();
             setSpeaking(false);
 
-            // ✅ stop all audio when flipping
             document.querySelectorAll("audio").forEach((a) => {
               a.pause();
               a.currentTime = 0;
@@ -254,80 +273,87 @@ export function FlipbookPreview({
         </HTMLFlipBook>
       </div>
 
-      {/* ── Bottom bar: zoom controls + page counter + keyboard hint ── */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 
-  px-3 py-2 rounded-xl 
-  bg-black/40 backdrop-blur-md 
-  border border-white/20 
-  shadow-lg shadow-black/30">
-
+      {/* ── Bottom bar: zoom + page counter + hint ── */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2">
         {/* Zoom out */}
-        <button
+        <NeoButton
           onClick={() =>
             setZoom((z) =>
               parseFloat(Math.max(ZOOM_MIN, z - ZOOM_STEP).toFixed(3))
             )
           }
           disabled={zoom <= ZOOM_MIN}
-          className="w-8 h-8 rounded-lg 
-      bg-white/80 text-black 
-      hover:bg-white 
-      disabled:opacity-30 
-      text-lg font-bold 
-      flex items-center justify-center 
-      transition"
           title="Zoom out"
+          variant="ghost"
+          className="w-10 h-10 text-xl"
         >
           −
-        </button>
+        </NeoButton>
 
         {/* Zoom % / fit reset */}
         <button
           onClick={computeFit}
-          className="px-3 py-1 rounded-lg 
-      bg-white/10 hover:bg-white/20 
-      text-white 
-      text-xs font-mono 
-      transition min-w-[56px] text-center 
-      border border-white/20"
           title="Reset to fit"
+          className="
+            px-3 py-2 min-w-[60px] text-center
+            bg-white text-[#222222]
+            font-bold text-xs font-mono tracking-wider
+            border-4 border-[#222222] rounded-2xl
+            shadow-[4px_4px_0px_0px_#222222]
+            active:translate-x-1 active:translate-y-1 active:shadow-none
+            transition-all duration-100
+          "
         >
           {Math.round(zoom * 100)}%
         </button>
 
         {/* Zoom in */}
-        <button
+        <NeoButton
           onClick={() =>
             setZoom((z) =>
               parseFloat(Math.min(ZOOM_MAX, z + ZOOM_STEP).toFixed(3))
             )
           }
           disabled={zoom >= ZOOM_MAX}
-          className="w-8 h-8 rounded-lg 
-      bg-white/80 text-black 
-      hover:bg-white 
-      disabled:opacity-30 
-      text-lg font-bold 
-      flex items-center justify-center 
-      transition"
           title="Zoom in"
+          variant="ghost"
+          className="w-10 h-10 text-xl"
         >
           +
-        </button>
+        </NeoButton>
 
-        <div className="w-px h-5 bg-white/30" />
+        {/* Divider */}
+        <div className="w-1 h-8 bg-[#222222] rounded-full mx-1" />
 
         {/* Page counter */}
-        <span className="text-white text-xs tracking-widest font-mono">
+        <div
+          className="
+            px-4 py-2
+            bg-[#FF6D1F] text-white
+            font-bold text-xs font-mono tracking-widest
+            border-4 border-[#222222] rounded-2xl
+            shadow-[4px_4px_0px_0px_#222222]
+          "
+        >
           {currentPage + 1} / {totalPages}
-        </span>
+        </div>
 
-        <div className="w-px h-5 bg-white/30" />
+        {/* Divider */}
+        <div className="w-1 h-8 bg-[#222222] rounded-full mx-1 hidden sm:block" />
 
         {/* Keyboard hint */}
-        <span className="text-white/70 text-[10px] tracking-wide hidden sm:block">
-          ← → or A D · Ctrl+scroll · Esc
-        </span>
+        <div
+          className="
+            hidden sm:flex items-center
+            px-3 py-2
+            bg-white text-[#222222]
+            font-bold text-[10px] tracking-wide
+            border-4 border-[#222222] rounded-2xl
+            shadow-[4px_4px_0px_0px_#222222]
+          "
+        >
+          ← → · A D · Ctrl+scroll · Esc
+        </div>
       </div>
     </main>
   );
