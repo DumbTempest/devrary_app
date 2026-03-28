@@ -4,22 +4,77 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/custom/navbar";
-import booksData from "../../../config.json";
 import Link from "next/link";
 
 export default function BookmarksPage() {
   const [bookmarks, setBookmarks] = useState<string[]>([]);
+  const [booksData, setBooksData] = useState<Record<string, any>>({});
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("bookmarks") || "[]");
-    setBookmarks(stored);
+    const fetchBookmarks = async () => {
+      try {
+        const res = await fetch("/api/bookmarks/all");
+        const data = await res.json();
+
+        if (res.ok) {
+          setBookmarks(data.bookmarks || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch bookmarks:", err);
+      }
+    };
+
+    fetchBookmarks();
   }, []);
 
-  const removeBookmark = (id: string) => {
-    const updated = bookmarks.filter((b) => b !== id);
-    setBookmarks(updated);
-    localStorage.setItem("bookmarks", JSON.stringify(updated));
+  const removeBookmark = async (id: string) => {
+    // optimistic update
+    setBookmarks((prev) => prev.filter((b) => b !== id));
+
+    try {
+      const res = await fetch("/api/bookmarks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bookId: id,
+          action: "remove",
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed");
+    } catch (err) {
+      console.error(err);
+    }
   };
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const results: Record<string, any> = {};
+
+        await Promise.all(
+          bookmarks.map(async (id) => {
+            const bookID = id.split("_")[0]; // Extract bookId from "bookId_pageNo"
+            const res = await fetch(`/api/books/${bookID}`);
+            if (res.ok) {
+              const data = await res.json();
+              results[id] = data;
+            }
+          })
+        );
+
+        setBooksData(results);
+      } catch (err) {
+        console.error("Failed to fetch books:", err);
+      }
+    };
+
+    if (bookmarks.length > 0) {
+      fetchBooks();
+    }
+  }, [bookmarks]);
 
   return (
     <main className="min-h-screen w-full bg-[#FAF3E1] p-10 font-tektur">
@@ -69,11 +124,13 @@ export default function BookmarksPage() {
 
           {bookmarks.map((id) => {
             const book = booksData[id];
+            const bookId = id.split("_")[0]; // Extract bookId from "bookId_pageNo"
+            const pageNo = id.split("_")[1]; // Extract pageNo from "bookId_pageNo"
             if (!book) return null;
 
             return (
               <Card
-                key={id}
+                key={bookId}
                 className="
                   bg-white
                   border-4 border-[#222222]

@@ -1,41 +1,51 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/lib/models/Users";
+import { getServerSession } from "next-auth";
+import { options } from "../auth/[...nextauth]/options";
 
 export async function POST(req: Request) {
   try {
     await connectDB();
 
-    const { email, bookId } = await req.json();
+    const session = await getServerSession(options);
 
-    if (!email || !bookId) {
-      return NextResponse.json(
-        { message: "Missing email or bookId" },
-        { status: 400 }
-      );
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await User.findOneAndUpdate(
-      { email },
-      { $addToSet: { bookmarks: bookId } }, // prevents duplicates
-      { new: true }
-    );
+    const { bookId, action } = await req.json();
+
+    if (!bookId || !action) {
+      return NextResponse.json({ error: "Missing data" }, { status: 400 });
+    }
+
+    const user = await User.findOne({ email: session.user.email });
 
     if (!user) {
-      return NextResponse.json(
-        { message: "User not found" },
-        { status: 404 }
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    if (action === "add") {
+      if (!user.bookmarks.includes(bookId)) {
+        user.bookmarks.push(bookId);
+      }
+    }
+
+    if (action === "remove") {
+      user.bookmarks = user.bookmarks.filter(
+        (id: string) => id !== bookId
       );
     }
 
+    await user.save();
+
     return NextResponse.json({
-      message: "Bookmark added",
+      success: true,
       bookmarks: user.bookmarks,
     });
-  } catch (error) {
-    return NextResponse.json(
-      { message: "Server error", error },
-      { status: 500 }
-    );
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }

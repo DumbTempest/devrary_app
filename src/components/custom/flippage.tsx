@@ -149,7 +149,6 @@ export default function Flipbook({
   bookId: string;
   onClose?: () => void;
 }) {
-  const [isBookmarked, setIsBookmarked] = useState(false);
   const flipBookRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -157,6 +156,27 @@ export default function Flipbook({
   const [bookMeta, setBookData] = useState<BookData | null>(null);
   const [totalPages, setTotalPages] = useState(0);
   const [zoom, setZoom] = useState(1);
+  const [bookmarks, setBookmarks] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchBookmarks = async () => {
+      try {
+        const res = await fetch("/api/user/bookmarks/all");
+        const data = await res.json();
+
+        if (res.ok) {
+          setBookmarks(data.bookmarks || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch bookmarks:", err);
+      }
+    };
+
+    fetchBookmarks();
+  }, []);
+  const isBookmarked = (bookId: string) => {
+    return bookmarks.includes(bookId);
+  };
 
   // Auto-fit zoom whenever container or book changes
   const computeFit = () => {
@@ -221,11 +241,6 @@ export default function Flipbook({
     fetchBookData();
   }, [bookId]);
 
-  useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("bookmarks") || "[]");
-    setIsBookmarked(stored.includes(bookId));
-  }, [bookId]);
-
   if (!bookMeta) {
     return (
       <div className="h-full w-full flex flex-col items-center justify-center gap-3 bg-neutral-950">
@@ -235,13 +250,30 @@ export default function Flipbook({
     );
   }
 
-  const toggleBookmark = () => {
-    const stored = JSON.parse(localStorage.getItem("bookmarks") || "[]");
-    const updated = stored.includes(bookId)
-      ? stored.filter((id: string) => id !== bookId)
-      : [...stored, bookId];
-    setIsBookmarked(!stored.includes(bookId));
-    localStorage.setItem("bookmarks", JSON.stringify(updated));
+  const toggleBookmark = async (bookId: string) => {
+    const isSaved = bookmarks.includes(bookId);
+
+    // ✅ optimistic UI update
+    setBookmarks((prev) =>
+      isSaved
+        ? prev.filter((id) => id !== bookId)
+        : [...prev, bookId]
+    );
+
+    try {
+      await fetch("/api/bookmarks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bookId,
+          action: isSaved ? "remove" : "add",
+        }),
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const speakCurrentPage = () => {
@@ -278,14 +310,14 @@ export default function Flipbook({
 
         {/* Bookmark */}
         <button
-          onClick={toggleBookmark}
+          onClick={() => toggleBookmark(bookId)}
           className={`px-3 py-1.5 rounded-lg font-semibold text-sm transition 
-      ${isBookmarked
+    ${isBookmarked(bookId)
               ? "bg-green-500 text-white"
               : "bg-white/80 text-black hover:bg-white"
             }`}
         >
-          {isBookmarked ? "✅ Saved" : "Save"}
+          {isBookmarked(bookId) ? "✅ Saved" : "Save"}
         </button>
 
         {/* Read aloud / Stop */}
