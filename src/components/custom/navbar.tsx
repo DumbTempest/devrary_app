@@ -55,25 +55,6 @@ export default function Navbar() {
           Home
         </Button>
       </Link>
-      <Link href="/books/bookmarks">
-        <Button
-          className="
-                bg-[#FF6D1F]
-                text-white
-                border-4 border-[#222222]
-                rounded-2xl
-                shadow-[6px_6px_0px_0px_#222222]
-                font-bold
-                px-10 py-5
-                active:translate-x-1
-                active:translate-y-1
-                active:shadow-none
-                transition-all
-              "
-        >
-          Bookmarks
-        </Button>
-      </Link>
       <Link href="books/search">
         <Button
           className="
@@ -165,6 +146,17 @@ export default function Navbar() {
               z-50
             "
             >
+              <button
+                onClick={() => router.push("/books/bookmarks")}
+                className="
+                  w-full text-left px-4 py-3
+                  font-bold
+                  hover:bg-[#FF6D1F] hover:text-white
+                  transition-all
+                "
+              >
+                Bookmarks
+              </button>
               <button
                 onClick={() => router.push("/books/create")}
                 className="

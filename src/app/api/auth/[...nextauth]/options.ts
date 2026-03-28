@@ -56,6 +56,7 @@ export const options: AuthOptions = {
 
                 if (dbUser) {
                     token.id = dbUser._id.toString();
+                    token.role = dbUser.role;
                 }
             }
 

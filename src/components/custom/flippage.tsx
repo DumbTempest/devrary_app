@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect } from "react";
 import HTMLFlipBookBase from "react-pageflip";
 import Image from "next/image";
 import booksData from "../../../config.json";
+import { useSession } from "next-auth/react";
 
 const HTMLFlipBook = HTMLFlipBookBase as any;
 
@@ -149,6 +150,7 @@ export default function Flipbook({
   bookId: string;
   onClose?: () => void;
 }) {
+  const { data: session, status } = useSession();
   const flipBookRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -171,8 +173,9 @@ export default function Flipbook({
         console.error("Failed to fetch bookmarks:", err);
       }
     };
-
-    fetchBookmarks();
+    if (status === "authenticated") {
+      fetchBookmarks();
+    }
   }, []);
   const isBookmarked = (bookId: string) => {
     return bookmarks.includes(bookId);
@@ -309,16 +312,18 @@ export default function Flipbook({
   shadow-lg shadow-black/30 rounded-lg">
 
         {/* Bookmark */}
-        <button
-          onClick={() => toggleBookmark(bookId)}
-          className={`px-3 py-1.5 rounded-lg font-semibold text-sm transition 
+        {status === "authenticated" && (
+          <button
+            onClick={() => toggleBookmark(bookId)}
+            className={`px-3 py-1.5 rounded-lg font-semibold text-sm transition 
     ${isBookmarked(bookId)
-              ? "bg-green-500 text-white"
-              : "bg-white/80 text-black hover:bg-white"
-            }`}
-        >
-          {isBookmarked(bookId) ? "✅ Saved" : "Save"}
-        </button>
+                ? "bg-green-500 text-white"
+                : "bg-white/80 text-black hover:bg-white"
+              }`}
+          >
+            {isBookmarked(bookId) ? "✅ Saved" : "Save"}
+          </button>
+        )}
 
         {/* Read aloud / Stop */}
         {!speaking ? (
