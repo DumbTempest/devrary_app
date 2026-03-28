@@ -147,6 +147,17 @@ export default function Navbar() {
             "
             >
               <button
+                onClick={() => router.push("/profile")}
+                className="
+                  w-full text-left px-4 py-3
+                  font-bold
+                  hover:bg-[#FF6D1F] hover:text-white
+                  transition-all
+                "
+              >
+                Profile
+              </button>
+              <button
                 onClick={() => router.push("/books/bookmarks")}
                 className="
                   w-full text-left px-4 py-3
