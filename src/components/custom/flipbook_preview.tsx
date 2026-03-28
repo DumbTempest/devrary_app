@@ -5,16 +5,22 @@ import { Page } from "./page";
 
 const HTMLFlipBook = HTMLFlipBookBase as any;
 
-const BOOK_W = 1200; 
+const BOOK_W = 1200;
 const BOOK_H = 700;
 const ZOOM_STEP = 0.1;
 const ZOOM_MIN = 0.3;
 const ZOOM_MAX = 2.0;
 
-type PageSection = {
-  type: "text" | "list" | "highlight";
-  content: any;
-};
+type PageSection =
+  | { type: "text"; content: string }
+  | { type: "list"; content: string[] }
+  | { type: "highlight"; content: string }
+  | { type: "video"; content: string }
+  | {
+    type: "audio";
+    content: string | { src: string; title?: string };
+  };
+
 
 type BookData = {
   name: string;
@@ -215,6 +221,12 @@ export function FlipbookPreview({
             setCurrentPage(e.data);
             speechSynthesis.cancel();
             setSpeaking(false);
+
+            // ✅ stop all audio when flipping
+            document.querySelectorAll("audio").forEach((a) => {
+              a.pause();
+              a.currentTime = 0;
+            });
           }}
         >
           <Cover
@@ -229,7 +241,7 @@ export function FlipbookPreview({
               key={index}
               number={index + 1}
               title={page.title}
-              sections={page.sections}
+              sections={page.sections || []}
             />
           ))}
 
