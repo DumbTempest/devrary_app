@@ -9,7 +9,6 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import * as THREE from "three";
 import Flipbook from "../../../components/custom/flippage";
-// import Navbar from "@/components/custom/navbar";
 import { Button } from "@/components/ui/button";
 import AnimatedSkyNoBirds from "@/components/custom/animated-sky-no-birds";
 
@@ -80,7 +79,6 @@ export default function Home() {
     }
     const [currentShelfBooks, setCurrentShelfBooks] = useState<any[]>([]);
 
-
     const shelfFromUrl = searchParams.get("shelf");
     const bookIdFromUrl = searchParams.get("bookId");
 
@@ -90,13 +88,11 @@ export default function Home() {
 
     useEffect(() => {
         if (!shelfFromUrl) return;
-
         const fetchBooks = async () => {
             const res = await fetch(`/api/books?shelf=${shelfFromUrl}`);
             const data = await res.json();
             setCurrentShelfBooks(data);
         };
-
         fetchBooks();
     }, [shelfFromUrl]);
 
@@ -140,14 +136,8 @@ export default function Home() {
     }, [roomSlug, router]);
 
     const handleSmartBack = useCallback(() => {
-        if (activeBookId) {
-            handleBookClose();
-            return;
-        }
-        if (selectedIndex !== null) {
-            handleReset();
-            return;
-        }
+        if (activeBookId) { handleBookClose(); return; }
+        if (selectedIndex !== null) { handleReset(); return; }
         router.push("/room");
     }, [activeBookId, selectedIndex, handleBookClose, handleReset, router]);
 
@@ -162,119 +152,126 @@ export default function Home() {
             <AnimatedSkyNoBirds />
             <main className="absolute h-screen w-screen overflow-hidden">
 
-            {/* Back Button */}
-            <div className="absolute bottom-0 right-0 mb-10 mr-10 z-50">
-                <Button
-                    onClick={handleSmartBack}
-                    className="bg-[#FF6D1F] text-white border-4 border-[#222222] rounded-2xl shadow-[6px_6px_0px_0px_#222222] font-bold px-10 py-5 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
+                {/* Back Button */}
+                <div className="absolute bottom-0 right-0 mb-10 mr-10 z-50">
+                    <Button
+                        onClick={handleSmartBack}
+                        className="bg-[#FF6D1F] text-white border-4 border-[#222222] rounded-2xl shadow-[6px_6px_0px_0px_#222222] font-bold px-10 py-5 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
+                    >
+                        ← {backLabel}
+                    </Button>
+                </div>
+
+                {/* Room Title */}
+                <div className="absolute top-6 left-8 z-50 pointer-events-none">
+                    <h1 className="text-white text-3xl font-semibold tracking-wide drop-shadow-lg font-tektur">
+                        {roomDisplayName}
+                    </h1>
+                </div>
+
+                <Canvas
+                    shadows
+                    orthographic
+                    camera={{ position: [10, 10, 10], zoom: 90 }}
+                    onPointerMissed={() => {
+                        if (activeBookId) handleBookClose();
+                        else if (selectedIndex !== null) handleReset();
+                    }}
                 >
-                    ← {backLabel}
-                </Button>
-            </div>
+                    <hemisphereLight intensity={0.4} />
+                    <directionalLight position={[10, 15, 10]} intensity={1.2} castShadow />
 
-            {/* Room Title */}
-            <div className="absolute top-6 left-8 z-50 pointer-events-none">
-                <h1 className="text-white text-3xl font-semibold tracking-wide drop-shadow-lg font-tektur">
-                    {roomDisplayName}
-                </h1>
-            </div>
+                    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
+                        <meshStandardMaterial color="#1e293b" />
+                    </mesh>
 
-            <Canvas
-                shadows
-                orthographic
-                camera={{ position: [10, 10, 10], zoom: 90 }}
-                onPointerMissed={() => {
-                    if (activeBookId) handleBookClose();
-                    else if (selectedIndex !== null) handleReset();
-                }}
-            >
-                <hemisphereLight intensity={0.4} />
-                <directionalLight position={[10, 15, 10]} intensity={1.2} castShadow />
+                    <Suspense fallback={null}>
+                        {techStack.map((tech, i) => (
+                            <Shelf
+                                key={i}
+                                position={shelves[i]}
+                                index={i}
+                                selectedIndex={selectedIndex}
+                                onClick={() => handleSelect(i)}
+                                onBookOpen={handleBookOpen}
+                                label={tech.name}
+                                labelColor={tech.color}
+                                resetSignal={resetSignal}
+                            />
+                        ))}
+                    </Suspense>
 
-                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
-                    <meshStandardMaterial color="#1e293b" />
-                </mesh>
+                    <CameraController
+                        target={selectedIndex !== null ? new THREE.Vector3(...shelves[selectedIndex]) : null}
+                        isZoomed={selectedIndex !== null}
+                    />
 
-                <Suspense fallback={null}>
-                    {techStack.map((tech, i) => (
-                        <Shelf
-                            key={i}
-                            position={shelves[i]}
-                            index={i}
-                            selectedIndex={selectedIndex}
-                            onClick={() => handleSelect(i)}
-                            onBookOpen={handleBookOpen}
-                            label={tech.name}
-                            labelColor={tech.color}
-                            resetSignal={resetSignal}
-                        />
-                    ))}
-                </Suspense>
+                    <OrbitControls
+                        enableRotate={selectedIndex === null}
+                        enableZoom
+                        enablePan={false}
+                        minZoom={70}
+                        maxZoom={250}
+                    />
+                </Canvas>
 
-                <CameraController
-                    target={selectedIndex !== null ? new THREE.Vector3(...shelves[selectedIndex]) : null}
-                    isZoomed={selectedIndex !== null}
-                />
-
-                <OrbitControls
-                    enableRotate={selectedIndex === null}
-                    enableZoom
-                    enablePan={false}
-                    minZoom={70}
-                    maxZoom={250}
-                />
-            </Canvas>
-
-            {/* Book Index Panel */}
-            {selectedIndex !== null && (
-                <BookIndexPanel
-                    books={currentShelfBooks}
-                    onBookOpen={handleBookOpen}
-                />
-            )}
-
-            {/* Book Overlay */}
-            <AnimatePresence>
-                {activeBookId && (
-                    <>
-                        <motion.div
-                            key="backdrop"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="absolute inset-0 z-40 bg-black/50"
-                            onClick={handleBookClose}
-                        />
-
-                        <motion.div
-                            key="book-panel"
-                            initial={{ opacity: 0, scale: 0.92, y: 24 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.92, y: 24 }}
-                            className="absolute z-50 inset-0 flex items-center justify-center pointer-events-none"
-                        >
-                            <div
-                                className="relative w-[95%] h-[95%] rounded-2xl overflow-hidden shadow-2xl pointer-events-auto"
-                                style={{ backgroundColor: overlayColor ?? "#1e293b" }}
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <button
-                                    onClick={handleBookClose}
-                                    className="absolute top-6 right-5 z-10 text-white/70 hover:text-white text-2xl font-light transition-colors"
-                                >
-                                    ✕
-                                </button>
-
-                                <div className="w-full h-full">
-                                    {activeBookId && <Flipbook bookId={activeBookId} />}
-                                </div>
-                            </div>
-                        </motion.div>
-                    </>
+                {/* Book Index Panel */}
+                {selectedIndex !== null && (
+                    <BookIndexPanel
+                        books={currentShelfBooks}
+                        onBookOpen={handleBookOpen}
+                    />
                 )}
-            </AnimatePresence>
-        </main>
-    </>
+
+                {/* Book Overlay */}
+                <AnimatePresence>
+                    {activeBookId && (
+                        <>
+                            {/* Transparent backdrop — only blocks pointer events to canvas below */}
+                            <motion.div
+                                key="backdrop"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 z-40 bg-transparent"
+                                onClick={handleBookClose}
+                            />
+
+                            <motion.div
+                                key="book-panel"
+                                initial={{ opacity: 0, scale: 0.92, y: 24 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.92, y: 24 }}
+                                className="absolute z-50 inset-0 flex items-center justify-center pointer-events-none"
+                            >
+                                {/* ↓ No backgroundColor — fully transparent modal */}
+                                <div
+                                    className="relative w-[95%] h-[95%] rounded-2xl overflow-hidden pointer-events-auto"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <button
+                                        onClick={handleBookClose}
+                                        className="absolute top-4 right-4 z-10 
+                                            bg-[#FF6D1F] text-white 
+                                            border-4 border-[#222222] rounded-2xl 
+                                            shadow-[4px_4px_0px_0px_#222222] 
+                                            font-bold px-4 py-2 text-sm
+                                            active:translate-x-1 active:translate-y-1 active:shadow-none 
+                                            transition-all"
+                                    >
+                                        ✕ Close
+                                    </button>
+
+                                    <div className="w-full h-full">
+                                        {activeBookId && <Flipbook bookId={activeBookId} />}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </>
+                    )}
+                </AnimatePresence>
+            </main>
+        </>
     );
 }
 
