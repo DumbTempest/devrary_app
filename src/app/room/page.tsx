@@ -177,8 +177,8 @@ function CameraController({
   useFrame((state) => {
     if (!target) {
       /* Idle cinematic drift */
-      camera.position.x += Math.sin(state.clock.elapsedTime * 0.3) * 0.05;
-      camera.position.y += Math.cos(state.clock.elapsedTime * 0.2) * 0.05;
+      camera.position.x += Math.sin(state.clock.elapsedTime * 0.2) * 0.008;
+      camera.position.y += Math.cos(state.clock.elapsedTime * 0.15) * 0.008;
       return;
     }
 
