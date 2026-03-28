@@ -61,12 +61,15 @@ export async function POST(req: Request) {
         if (!draft || draft.status !== "draft") {
             return NextResponse.json({ error: "Invalid draft" }, { status: 400 });
         }
+        const cleanId = draftId.replace("draft_", "");
+        const parts = cleanId.split("-");
 
-        const difficulty = draft.difficulty;
-        const domain = draft.domain;
-        const language = draft.language || "javascript";
+        const levelPart = parts[0];
 
-        const langCode = LANGUAGE_MAP[language.toLowerCase()] ?? 0;
+        const difficulty = levelPart.slice(0, 2);
+
+        const domain = parts.slice(1, -1).join("-");
+        const langCode = parseInt(parts[parts.length - 1]);
 
         const prefix = `${difficulty}-${domain}`;
 

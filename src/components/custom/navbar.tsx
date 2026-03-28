@@ -55,7 +55,7 @@ export default function Navbar() {
           Home
         </Button>
       </Link>
-      <Link href="/bookmarks">
+      <Link href="/books/bookmarks">
         <Button
           className="
                 bg-[#FF6D1F]
@@ -74,7 +74,7 @@ export default function Navbar() {
           Bookmarks
         </Button>
       </Link>
-      <Link href="/search">
+      <Link href="books/search">
         <Button
           className="
                 bg-[#FF6D1F]
@@ -166,7 +166,7 @@ export default function Navbar() {
             "
             >
               <button
-                onClick={() => router.push("/create")}
+                onClick={() => router.push("/books/create")}
                 className="
                   w-full text-left px-4 py-3
                   font-bold
@@ -178,7 +178,7 @@ export default function Navbar() {
               </button>
               {session.user.role === "admin" && (
                 <button
-                  onClick={() => router.push("/approve-books")}
+                  onClick={() => router.push("/books/approve-books")}
                   className="
                     w-full text-left px-4 py-3
                     font-bold
