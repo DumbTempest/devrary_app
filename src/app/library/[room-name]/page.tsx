@@ -11,6 +11,7 @@ import * as THREE from "three";
 import Flipbook from "../../../components/custom/flippage";
 // import Navbar from "@/components/custom/navbar";
 import { Button } from "@/components/ui/button";
+import AnimatedSkyNoBirds from "@/components/custom/animated-sky-no-birds";
 
 
 const techStack = [
@@ -157,7 +158,9 @@ export default function Home() {
             : "Back to Rooms";
 
     return (
-        <main className="absolute h-screen w-screen bg-[#FAF3E1] overflow-hidden">
+        <>
+            <AnimatedSkyNoBirds />
+            <main className="absolute h-screen w-screen overflow-hidden">
 
             {/* Back Button */}
             <div className="absolute bottom-0 right-0 mb-10 mr-10 z-50">
@@ -271,6 +274,7 @@ export default function Home() {
                 )}
             </AnimatePresence>
         </main>
+    </>
     );
 }
 

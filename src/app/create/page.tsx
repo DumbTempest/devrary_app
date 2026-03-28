@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/custom/navbar";
 import { FlipbookPreview } from "@/components/custom/flippage";
+import AnimatedSkyNoBirds from "@/components/custom/animated-sky-no-birds";
 
 const PRESET_TAGS = [
     "javascript", "typescript", "react", "nextjs", "nodejs", "express", "mongodb", "sql", "postgresql", "firebase",
@@ -82,8 +83,10 @@ export default function CreatePage() {
     };
 
     return (
-        <main className="min-h-screen bg-[#FAF3E1] p-10 font-['Syne',sans-serif]">
-            <Navbar />
+        <>
+            <AnimatedSkyNoBirds />
+            <main className="relative min-h-screen p-10 font-['Syne',sans-serif]">
+                <Navbar />
 
             {/* Load Syne from Google Fonts in your _app or layout */}
             {/* <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" /> */}
@@ -597,5 +600,6 @@ export default function CreatePage() {
                 />
             </div>
         </main>
+    </>
     );
 }

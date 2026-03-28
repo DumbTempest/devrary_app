@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import * as THREE from "three";
 import Navbar from "@/components/custom/navbar";
+import AnimatedSkyNoBirds from "@/components/custom/animated-sky-no-birds";
 
 /* ---------------- ROOM MODEL ---------------- */
 
@@ -215,12 +216,14 @@ export default function RoomGridPage() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8 }}
-      className="w-screen bg-[#FAF3E1] h-screen relative overflow-hidden"
-    >
+    <>
+      <AnimatedSkyNoBirds />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        className="w-screen h-screen relative overflow-hidden"
+      >
       {/* NAVBAR ANIMATION */}
       <motion.div
         initial={{ y: -40, opacity: 0 }}
@@ -265,6 +268,7 @@ export default function RoomGridPage() {
         )}
       </AnimatePresence>
     </motion.div>
+    </>
   );
 }
 

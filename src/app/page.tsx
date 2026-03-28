@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import Navbar from "@/components/custom/navbar";
+import AnimatedSkyNoBirds from "@/components/custom/animated-sky-no-birds";
 import { motion } from "framer-motion";
 import * as THREE from "three";
 
@@ -40,13 +41,15 @@ export default function Home() {
   const { data: session, status } = useSession();
 
   return (
-    <motion.main
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8 }}
-      className="h-screen w-full bg-[#FAF3E1] p-10 font-tektur overflow-hidden"
-    >
-      <Navbar />
+    <>
+      <AnimatedSkyNoBirds />
+      <motion.main
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        className="relative h-screen w-full p-10 font-tektur overflow-hidden"
+      >
+        <Navbar />
 
       <div className="grid grid-cols-2 gap-16 items-start">
 
@@ -139,5 +142,6 @@ export default function Home() {
 
       </div>
     </motion.main>
+    </>
   );
 }

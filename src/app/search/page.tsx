@@ -7,6 +7,7 @@ import Navbar from "@/components/custom/navbar";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import AnimatedSkyNoBirds from "@/components/custom/animated-sky-no-birds";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
@@ -58,8 +59,10 @@ export default function SearchPage() {
   };
 
   return (
-    <main className="min-h-screen w-full bg-[#FAF3E1] font-tektur">
-      <div className="absolute top-10 right-11 w-full z-50">
+    <>
+      <AnimatedSkyNoBirds />
+      <main className="relative min-h-screen w-full font-tektur">
+        <div className="absolute top-10 right-11 w-full z-50">
         <Navbar />
       </div>
 
@@ -184,6 +187,7 @@ export default function SearchPage() {
           </AnimatePresence>
         </Card>
       </div>
-    </main>
+      </main>
+    </>
   );
 }
