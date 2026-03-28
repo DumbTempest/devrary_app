@@ -10,7 +10,7 @@ export async function GET(request, { params }) {
         if (!book) {
             return NextResponse.json({ error: "Book not found" }, { status: 404 });
         }
-        console.log(book);
+       // console.log(book);
         return NextResponse.json(book);
     } catch (error) {
         console.error("Error fetching book:", error);

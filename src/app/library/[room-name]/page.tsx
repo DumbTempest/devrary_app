@@ -52,18 +52,6 @@ function CameraController({
     return null;
 }
 
-const sampleBooks = {
-    "l1b1-web-dev-0": {
-        "name": "JavaScript Foundations",
-        "description": "A beginner-friendly introduction to variables, functions, loops, and core JavaScript concepts.",
-        "author": "Alex Carter",
-        "duration": "4 hours",
-        "variant": "thick",
-        "tags": ["javascript", "beginner"],
-        "pages": [ /* your pages array */ ]
-    },
-};
-
 
 export default function Home() {
     const router = useRouter();
@@ -84,7 +72,13 @@ export default function Home() {
     const [overlayColor, setOverlayColor] = useState<string | null>(null);
     const [resetSignal, setResetSignal] = useState(0);
     const [activeBookId, setActiveBookId] = useState<string | null>(null);
+    type Book = {
+        _id: string;
+        name?: string;
+        author?: string;
+    }
     const [currentShelfBooks, setCurrentShelfBooks] = useState<any[]>([]);
+
 
     const shelfFromUrl = searchParams.get("shelf");
     const bookIdFromUrl = searchParams.get("bookId");
@@ -93,21 +87,17 @@ export default function Home() {
 
     const [selectedIndex, setSelectedIndex] = useState<number | null>(initialIndex);
 
-    // Load books when shelf is selected
     useEffect(() => {
-        if (selectedIndex !== null) {
-            // TODO: Replace with real MongoDB query later
-            // Example: fetch(`/api/books?domain=web-dev&shelfId=${selectedIndex}`)
+        if (!shelfFromUrl) return;
 
-            const booksForShelf = Object.entries(sampleBooks)
-                .filter(([id]) => id.endsWith(`-web-dev-${selectedIndex}`))
-                .map(([id, book]) => ({ id, ...book }));
+        const fetchBooks = async () => {
+            const res = await fetch(`/api/books?shelf=${shelfFromUrl}`);
+            const data = await res.json();
+            setCurrentShelfBooks(data);
+        };
 
-            setCurrentShelfBooks(booksForShelf);
-        } else {
-            setCurrentShelfBooks([]);
-        }
-    }, [selectedIndex]);
+        fetchBooks();
+    }, [shelfFromUrl]);
 
     useEffect(() => {
         setActiveBookId(bookIdFromUrl ?? null);
@@ -115,7 +105,7 @@ export default function Home() {
 
     const shelves: [number, number, number][] = [
         [-4, 0, -2], [0, 0, -2], [4, 0, -2],
-        [-4, 0, 2],  [0, 0, 2],  [4, 0, 2],
+        [-4, 0, 2], [0, 0, 2], [4, 0, 2],
     ];
 
     const handleSelect = (index: number) => {
@@ -160,10 +150,10 @@ export default function Home() {
         router.push("/room");
     }, [activeBookId, selectedIndex, handleBookClose, handleReset, router]);
 
-    const backLabel = activeBookId 
-        ? "Close Book" 
-        : selectedIndex !== null 
-            ? "Back to Library" 
+    const backLabel = activeBookId
+        ? "Close Book"
+        : selectedIndex !== null
+            ? "Back to Library"
             : "Back to Rooms";
 
     return (
@@ -232,11 +222,11 @@ export default function Home() {
                 />
             </Canvas>
 
-            {/* Book Index Panel - Pass current shelf books */}
+            {/* Book Index Panel */}
             {selectedIndex !== null && (
-                <BookIndexPanel 
-                    books={currentShelfBooks} 
-                    onBookOpen={handleBookOpen} 
+                <BookIndexPanel
+                    books={currentShelfBooks}
+                    onBookOpen={handleBookOpen}
                 />
             )}
 
