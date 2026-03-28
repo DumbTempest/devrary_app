@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/custom/navbar";
-import { FlipbookPreview } from "@/components/custom/flippage";
+import { FlipbookPreview } from "@/components/custom/flipbook_preview";
 
 export default function ApproveBooksPage() {
     const { data: session, status } = useSession();

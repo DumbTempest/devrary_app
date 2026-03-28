@@ -20,11 +20,13 @@ type PageSection =
     };
 
 type BookData = {
+  _id?: string;
   name: string;
   description: string;
   author: string;
   duration: string;
   variant: string;
+  language?: string;
   tags: string[];
   pages: Array<{
     title: string;
@@ -33,6 +35,68 @@ type BookData = {
   CoverImage?: string;
   BackcoverImage?: string;
 };
+
+const LANGUAGE_COVER_MAP: Record<string, string> = {
+  javascript: "/covers/back-js-yellow.svg",
+  js: "/covers/back-js-yellow.svg",
+  typescript: "/covers/back-ts-blue.svg",
+  ts: "/covers/back-ts-blue.svg",
+  go: "/covers/back-go-green.svg",
+  rust: "/covers/back-rust-orange.svg",
+  "c++": "/covers/c++.jpg",
+  cpp: "/covers/c++.jpg",
+  java: "/covers/java.png",
+};
+
+const LANGUAGE_CODE_MAP: Record<string, string> = {
+  "0": "javascript",
+  "1": "typescript",
+  "2": "go",
+  "3": "c++",
+  "4": "rust",
+  "5": "python",
+};
+
+const BACK_COVER_COLOR_MAP: Record<string, string> = {
+  javascript: "/covers/back-js-yellow.svg",
+  js: "/covers/back-js-yellow.svg",
+  typescript: "/covers/back-ts-blue.svg",
+  ts: "/covers/back-ts-blue.svg",
+  rust: "/covers/back-rust-orange.svg",
+  java: "/covers/back-java-offwhite.svg",
+  "c++": "/covers/back-cpp-lightblue.svg",
+  cpp: "/covers/back-cpp-lightblue.svg",
+};
+
+function getBookLanguage(book: BookData): string | null {
+  const normalizedTags = Array.isArray(book.tags)
+    ? book.tags.map((tag) => String(tag).toLowerCase())
+    : [];
+
+  const explicitLanguage = book.language?.toLowerCase();
+  if (explicitLanguage) {
+    return explicitLanguage;
+  }
+
+  const tagLanguage = normalizedTags.find((tag) => LANGUAGE_COVER_MAP[tag]);
+  if (tagLanguage) {
+    return tagLanguage;
+  }
+
+  const trailingCode = book._id?.split("-").pop();
+  const mappedLanguage = trailingCode ? LANGUAGE_CODE_MAP[trailingCode] : undefined;
+  return mappedLanguage || null;
+}
+
+function getLanguageCover(book: BookData): string | null {
+  const language = getBookLanguage(book);
+  if (language && LANGUAGE_COVER_MAP[language]) {
+    return LANGUAGE_COVER_MAP[language];
+  }
+
+  return null;
+}
+
 
 /* ───────────── FLIPBOOK ───────────── */
 const BOOK_W = 1200;
@@ -223,6 +287,17 @@ export default function Flipbook({
     setSpeaking(false);
   };
 
+  const language = getBookLanguage(bookMeta);
+  const languageCover = getLanguageCover(bookMeta);
+  const frontCoverImage =
+    bookMeta.CoverImage || languageCover || "/covers/default-cover.png";
+  const colorBackCover = language ? BACK_COVER_COLOR_MAP[language] : undefined;
+  const backCoverImage =
+    bookMeta.BackcoverImage ||
+    colorBackCover ||
+    languageCover ||
+    "/covers/default-cover.png";
+
   return (
     <main
       ref={containerRef}
@@ -308,7 +383,7 @@ export default function Flipbook({
             title={bookMeta.name}
             author={bookMeta.author}
             subtitle={bookMeta.description}
-            coverImage={bookMeta.CoverImage || "/covers/default-cover.png"}
+            coverImage={frontCoverImage}
           />
 
           {bookMeta.pages.map((page, index) => (
@@ -324,7 +399,7 @@ export default function Flipbook({
             title="The End"
             subtitle={`Thank you for reading ${bookMeta.name}`}
             author={bookMeta.author}
-            coverImage={bookMeta.BackcoverImage || "/covers/default-cover.png"}
+            coverImage={backCoverImage}
           />
         </HTMLFlipBook>
       </div>

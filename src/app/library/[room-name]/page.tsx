@@ -89,8 +89,9 @@ export default function Home() {
     useEffect(() => {
         if (!shelfFromUrl) return;
         const fetchBooks = async () => {
-            const res = await fetch(`/api/books?shelf=${shelfFromUrl}`);
+            const res = await fetch(`/api/shelf?shelf=${shelfFromUrl}`);
             const data = await res.json();
+            console.log("Fetched books for shelf", shelfFromUrl, data);
             setCurrentShelfBooks(data);
         };
         fetchBooks();
