@@ -57,7 +57,6 @@ export default function CreatePage() {
         setPages(updated);
     };
 
-    // 🔥 Generate ID
     const generateId = () => {
         const base = `${form.difficulty}b${1}-${form.domain}-0`;
         return base.toLowerCase();
@@ -75,7 +74,6 @@ export default function CreatePage() {
 
         console.log("Payload:", payload);
 
-        // 🔥 POST (you'll implement backend)
         await fetch("/api/books", {
             method: "POST",
             body: JSON.stringify(payload),
@@ -84,103 +82,160 @@ export default function CreatePage() {
     };
 
     return (
-        <main className="min-h-screen bg-[#FAF3E1] p-10">
+        <main className="min-h-screen bg-[#FAF3E1] p-10 font-['Syne',sans-serif]">
             <Navbar />
 
+            {/* Load Syne from Google Fonts in your _app or layout */}
+            {/* <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" /> */}
+
             <div className="flex justify-center mt-10">
-                <Card className="p-10 w-[900px] bg-[#F5E7C6] border-4 border-[#222] rounded-3xl shadow-[10px_10px_0px_0px_#222] space-y-8">
+                <Card className="p-10 w-[900px] bg-[#F5E7C6] border-4 border-[#222] rounded-3xl shadow-[10px_10px_0px_0px_#222] space-y-10">
 
-                    <h1 className="text-3xl font-bold text-[#222]">Create Book</h1>
+                    <h1 className="text-4xl font-extrabold tracking-tight text-[#222]">Create Book</h1>
 
-                    {/* 🔹 Basic Info */}
-                    <div className="space-y-6">
-                        <h2 className="text-xl font-bold">Basic Info</h2>
+                    {/* ── Basic Info ── */}
+                    <section className="space-y-5">
+                        <h2 className="text-base font-bold uppercase tracking-widest text-[#222]/50">Basic Info</h2>
 
-                        <div className="grid grid-cols-2 gap-6">
-                            <div>
-                                <label className="label">Name</label>
-                                <input className="input" onChange={(e) => handleChange("name", e.target.value)} />
+                        <div className="grid grid-cols-2 gap-5">
+
+                            {/* Name */}
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-bold uppercase tracking-widest text-[#222]">Name</label>
+                                <input
+                                    className="
+                w-full px-4 py-3 text-sm font-semibold text-[#222]
+                bg-white rounded-xl
+                border-2 border-[#222]
+                shadow-[4px_4px_0px_0px_#222]
+                placeholder:text-[#aaa] placeholder:font-normal
+                focus:outline-none focus:shadow-none focus:translate-x-[2px] focus:translate-y-[2px]
+                transition-all duration-100
+              "
+                                    placeholder="e.g. Intro to React"
+                                    onChange={(e) => handleChange("name", e.target.value)}
+                                />
                             </div>
 
-                            <div>
-                                <label className="label">Author</label>
-                                <input className="input" onChange={(e) => handleChange("author", e.target.value)} />
+                            {/* Author */}
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-bold uppercase tracking-widest text-[#222]">Author</label>
+                                <input
+                                    className="
+                w-full px-4 py-3 text-sm font-semibold text-[#222]
+                bg-white rounded-xl
+                border-2 border-[#222]
+                shadow-[4px_4px_0px_0px_#222]
+                placeholder:text-[#aaa] placeholder:font-normal
+                focus:outline-none focus:shadow-none focus:translate-x-[2px] focus:translate-y-[2px]
+                transition-all duration-100
+              "
+                                    placeholder="e.g. Jane Doe"
+                                    onChange={(e) => handleChange("author", e.target.value)}
+                                />
                             </div>
 
-                            <div className="col-span-2">
-                                <label className="label">Description</label>
-                                <textarea className="input h-24 resize-none" onChange={(e) => handleChange("description", e.target.value)} />
+                            {/* Description */}
+                            <div className="col-span-2 flex flex-col gap-1.5">
+                                <label className="text-xs font-bold uppercase tracking-widest text-[#222]">Description</label>
+                                <textarea
+                                    rows={3}
+                                    className="
+                w-full px-4 py-3 text-sm font-semibold text-[#222]
+                bg-white rounded-xl resize-none
+                border-2 border-[#222]
+                shadow-[4px_4px_0px_0px_#222]
+                placeholder:text-[#aaa] placeholder:font-normal
+                focus:outline-none focus:shadow-none focus:translate-x-[2px] focus:translate-y-[2px]
+                transition-all duration-100
+              "
+                                    placeholder="What is this book about?"
+                                    onChange={(e) => handleChange("description", e.target.value)}
+                                />
                             </div>
 
-                            <div>
-                                <label className="label">Duration</label>
-                                <input className="input" onChange={(e) => handleChange("duration", e.target.value)} />
+                            {/* Duration */}
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-bold uppercase tracking-widest text-[#222]">Duration</label>
+                                <input
+                                    className="
+                w-full px-4 py-3 text-sm font-semibold text-[#222]
+                bg-white rounded-xl
+                border-2 border-[#222]
+                shadow-[4px_4px_0px_0px_#222]
+                placeholder:text-[#aaa] placeholder:font-normal
+                focus:outline-none focus:shadow-none focus:translate-x-[2px] focus:translate-y-[2px]
+                transition-all duration-100
+              "
+                                    placeholder="e.g. 2h 30m"
+                                    onChange={(e) => handleChange("duration", e.target.value)}
+                                />
                             </div>
 
-                            <div className="flex flex-col gap-3">
-                                <label className="font-bold text-[#222] text-sm">
-                                    Tags (max 5)
+                            {/* Tags */}
+                            <div className="flex flex-col gap-2.5">
+                                <label className="text-xs font-bold uppercase tracking-widest text-[#222]">
+                                    Tags <span className="font-normal normal-case tracking-normal text-[#222]/40">(max 5)</span>
                                 </label>
 
-                                {/* Selected Tags */}
-                                <div className="flex flex-wrap gap-2">
-                                    {form.tags.split(",").filter(Boolean).map((tag: string) => (
-                                        <div
-                                            key={tag}
-                                            className="
-          bg-[#FF6D1F]
-          text-white
-          px-3 py-1
-          rounded-lg
-          border-2 border-[#222]
-          text-sm
-          cursor-pointer
-        "
-                                            onClick={() => {
-                                                const updated = form.tags
-                                                    .split(",")
-                                                    .filter((t: string) => t !== tag)
-                                                    .join(",");
-                                                handleChange("tags", updated);
-                                            }}
-                                        >
-                                            {tag} ✕
-                                        </div>
-                                    ))}
-                                </div>
+                                {/* Selected tags */}
+                                {form.tags.split(",").filter(Boolean).length > 0 && (
+                                    <div className="flex flex-wrap gap-2">
+                                        {form.tags.split(",").filter(Boolean).map((tag: string) => (
+                                            <button
+                                                key={tag}
+                                                type="button"
+                                                onClick={() => {
+                                                    const updated = form.tags.split(",").filter((t: string) => t !== tag).join(",");
+                                                    handleChange("tags", updated);
+                                                }}
+                                                className="
+                      flex items-center gap-1.5
+                      bg-[#FF6D1F] text-white
+                      px-3 py-1 rounded-lg
+                      border-2 border-[#222]
+                      text-xs font-bold uppercase tracking-wide
+                      hover:bg-[#e55c10] transition-colors
+                    "
+                                            >
+                                                {tag}
+                                                <span className="text-[10px] opacity-80">✕</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
 
-                                {/* Preset Tags */}
-                                <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto border-2 border-[#222] p-3 rounded-xl bg-white">
+                                {/* Preset tag picker */}
+                                <div className="
+              flex flex-wrap gap-2 max-h-36 overflow-y-auto
+              border-2 border-[#222] p-3 rounded-xl bg-white
+            ">
                                     {PRESET_TAGS.map((tag) => {
                                         const selected = form.tags.split(",").includes(tag);
-
                                         return (
                                             <button
                                                 key={tag}
                                                 type="button"
-                                                disabled={
-                                                    !selected &&
-                                                    form.tags.split(",").filter(Boolean).length >= 5
-                                                }
+                                                disabled={!selected && form.tags.split(",").filter(Boolean).length >= 5}
                                                 onClick={() => {
                                                     let current = form.tags.split(",").filter(Boolean);
-
                                                     if (selected) {
                                                         current = current.filter((t: string) => t !== tag);
                                                     } else {
                                                         if (current.length >= 5) return;
                                                         current.push(tag);
                                                     }
-
                                                     handleChange("tags", current.join(","));
                                                 }}
                                                 className={`
-            px-3 py-1 rounded-lg text-sm border-2 border-[#222]
-            transition-all
-            ${selected
+                      px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide
+                      border-2 border-[#222] transition-all
+                      disabled:opacity-30 disabled:cursor-not-allowed
+                      ${selected
                                                         ? "bg-[#222] text-white"
-                                                        : "bg-[#F5E7C6] hover:bg-[#FF6D1F] hover:text-white"}
-          `}
+                                                        : "bg-[#F5E7C6] hover:bg-[#FF6D1F] hover:text-white hover:border-[#FF6D1F]"
+                                                    }
+                    `}
                                             >
                                                 {tag}
                                             </button>
@@ -188,46 +243,48 @@ export default function CreatePage() {
                                     })}
                                 </div>
 
-                                {/* Optional manual input */}
+                                {/* Custom tag input */}
                                 <input
-                                    placeholder="Or type custom tags..."
+                                    placeholder="Type a custom tag + Enter"
                                     onKeyDown={(e) => {
                                         if (e.key === "Enter") {
                                             e.preventDefault();
-
                                             const value = (e.target as HTMLInputElement).value.trim();
                                             if (!value) return;
-
-                                            let current = form.tags.split(",").filter(Boolean);
-
-                                            if (current.length >= 5) return;
-
-                                            if (!current.includes(value)) {
-                                                current.push(value);
-                                            }
-
+                                            const current = form.tags.split(",").filter(Boolean);
+                                            if (current.length >= 5 || current.includes(value)) return;
+                                            current.push(value);
                                             handleChange("tags", current.join(","));
                                             (e.target as HTMLInputElement).value = "";
                                         }
                                     }}
                                     className="
-                                        border-4 border-[#222]
-                                        rounded-xl
-                                        bg-white
-                                        px-4 py-3
-                                        shadow-[4px_4px_0px_0px_#222]
-                                        focus:translate-x-[2px]
-                                        focus:translate-y-[2px]
-                                        focus:shadow-none
-                                        transition-all
-                                        outline-none
-                                        "
+                w-full px-4 py-3 text-sm font-semibold text-[#222]
+                bg-white rounded-xl
+                border-2 border-[#222]
+                shadow-[4px_4px_0px_0px_#222]
+                placeholder:text-[#aaa] placeholder:font-normal
+                focus:outline-none focus:shadow-none focus:translate-x-[2px] focus:translate-y-[2px]
+                transition-all duration-100
+              "
                                 />
                             </div>
 
-                            <div>
-                                <label className="label">Difficulty</label>
-                                <select className="input" onChange={(e) => handleChange("difficulty", e.target.value)}>
+                            {/* Difficulty */}
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-bold uppercase tracking-widest text-[#222]">Difficulty</label>
+                                <select
+                                title="meow"
+                                    className="
+                w-full px-4 py-3 text-sm font-semibold text-[#222]
+                bg-white rounded-xl appearance-none cursor-pointer
+                border-2 border-[#222]
+                shadow-[4px_4px_0px_0px_#222]
+                focus:outline-none focus:shadow-none focus:translate-x-[2px] focus:translate-y-[2px]
+                transition-all duration-100
+              "
+                                    onChange={(e) => handleChange("difficulty", e.target.value)}
+                                >
                                     <option value="l1">Beginner</option>
                                     <option value="l2">Intermediate</option>
                                     <option value="l3">Expert</option>
@@ -235,9 +292,21 @@ export default function CreatePage() {
                                 </select>
                             </div>
 
-                            <div>
-                                <label className="label">Domain</label>
-                                <select className="input" onChange={(e) => handleChange("domain", e.target.value)}>
+                            {/* Domain */}
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-bold uppercase tracking-widest text-[#222]">Domain</label>
+                                <select
+                                title="meow"
+                                    className="
+                w-full px-4 py-3 text-sm font-semibold text-[#222]
+                bg-white rounded-xl appearance-none cursor-pointer
+                border-2 border-[#222]
+                shadow-[4px_4px_0px_0px_#222]
+                focus:outline-none focus:shadow-none focus:translate-x-[2px] focus:translate-y-[2px]
+                transition-all duration-100
+              "
+                                    onChange={(e) => handleChange("domain", e.target.value)}
+                                >
                                     <option value="web-dev">Web Dev</option>
                                     <option value="ai">AI / ML</option>
                                     <option value="blockchain">Blockchain</option>
@@ -246,27 +315,164 @@ export default function CreatePage() {
                                     <option value="cloud">Cloud</option>
                                 </select>
                             </div>
-                        </div>
-                    </div>
 
-                    {/* 🔹 Pages */}
-                    <div className="space-y-6">
-                        <h2 className="text-xl font-bold">Pages</h2>
+                        </div>
+                    </section>
+
+                    {/* ── Pages ── */}
+                    <section className="space-y-5">
+                        <h2 className="text-base font-bold uppercase tracking-widest text-[#222]/50">Pages</h2>
+                        <div
+                            className="
+    bg-[#FFF7E6] border-2 border-[#222]
+    rounded-2xl shadow-[6px_6px_0px_0px_#222]
+    p-5 space-y-4
+  "
+                        >
+                            {/* Heading */}
+                            <h2 className="text-sm font-bold uppercase tracking-widest text-[#222]">
+                                Front Cover
+                            </h2>
+
+                            {/* Title */}
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-bold uppercase tracking-widest text-[#222]">
+                                    Title
+                                </label>
+                                <input
+                                    title="meow"
+                                    value="My Awesome Book"
+                                    readOnly
+                                    className="
+        w-full px-4 py-3 text-sm font-semibold text-[#222]
+        bg-[#FAF3E1] rounded-xl
+        border-2 border-[#222]
+        shadow-[3px_3px_0px_0px_#222]
+      "
+                                />
+                            </div>
+
+                            {/* Sections */}
+                            <div className="space-y-2.5">
+
+
+                                {/* Section 2 */}
+                                <div className="flex gap-2.5 items-center">
+                                    <select
+                                       title="meow"
+                                        className="
+                      px-3 py-2.5 text-xs font-bold uppercase tracking-wide text-[#222]
+                      bg-[#F5E7C6] rounded-lg appearance-none cursor-pointer
+                      border-2 border-[#222]
+                      shadow-[3px_3px_0px_0px_#222]
+                      focus:outline-none focus:shadow-none focus:translate-x-[1px] focus:translate-y-[1px]
+                      transition-all duration-100 w-[110px] shrink-0
+                    "
+                                    >
+                                        <option value="text">Text</option>
+                                        <option value="highlight">Code</option>
+                                        <option value="list">List</option>
+                                    </select>
+                                    <input
+
+                                        className="
+                  w-full px-4 py-3 text-sm font-semibold text-[#222]
+                  bg-[#FAF3E1] rounded-xl
+                  border-2 border-[#222]
+                  shadow-[3px_3px_0px_0px_#222]
+                  placeholder:text-[#aaa] placeholder:font-normal
+                  focus:outline-none focus:shadow-none focus:translate-x-[1px] focus:translate-y-[1px]
+                  transition-all duration-100
+                "
+                                        placeholder="Page title..."
+                                    />
+                                </div>
+                            </div>
+
+                        </div>
+                        <div
+                            className="
+    bg-[#FFF7E6] border-2 border-[#222]
+    rounded-2xl shadow-[6px_6px_0px_0px_#222]
+    p-5 space-y-4
+  "
+                        >
+                            {/* Heading */}
+                            <h2 className="text-sm font-bold uppercase tracking-widest text-[#222]">
+                                Back Cover
+                            </h2>
+
+                            {/* Title */}
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-bold uppercase tracking-widest text-[#222]">
+                                    Title
+                                </label>
+                                <input
+                                    title="meow"
+                                    value="My Awesome Book"
+                                    readOnly
+                                    className="
+        w-full px-4 py-3 text-sm font-semibold text-[#222]
+        bg-[#FAF3E1] rounded-xl
+        border-2 border-[#222]
+        shadow-[3px_3px_0px_0px_#222]
+      "
+                                />
+                            </div>
+
+                            {/* Sections */}
+                            <div className="space-y-2.5">
+
+
+                                {/* Section 2 */}
+                                <div className="flex gap-2.5 items-center">
+                                    <select
+                                       title="meow"
+                                        className="
+                      px-3 py-2.5 text-xs font-bold uppercase tracking-wide text-[#222]
+                      bg-[#F5E7C6] rounded-lg appearance-none cursor-pointer
+                      border-2 border-[#222]
+                      shadow-[3px_3px_0px_0px_#222]
+                      focus:outline-none focus:shadow-none focus:translate-x-[1px] focus:translate-y-[1px]
+                      transition-all duration-100 w-[110px] shrink-0
+                    "
+                                    >
+                                        <option value="text">Text</option>
+                                        <option value="highlight">Code</option>
+                                        <option value="list">List</option>
+                                    </select>
+                                    <input
+
+                                        className="
+                  w-full px-4 py-3 text-sm font-semibold text-[#222]
+                  bg-[#FAF3E1] rounded-xl
+                  border-2 border-[#222]
+                  shadow-[3px_3px_0px_0px_#222]
+                  placeholder:text-[#aaa] placeholder:font-normal
+                  focus:outline-none focus:shadow-none focus:translate-x-[1px] focus:translate-y-[1px]
+                  transition-all duration-100
+                "
+                                        placeholder="Page title..."
+                                    />
+                                </div>
+                            </div>
+
+                        </div>
 
                         {pages.map((page, pIndex) => (
                             <div
                                 key={pIndex}
                                 className="
-              bg-white
-              border-3 border-[#222]
-              rounded-2xl
-              shadow-[6px_6px_0px_0px_#222]
-              p-5
-              space-y-4
+              bg-white border-2 border-[#222]
+              rounded-2xl shadow-[6px_6px_0px_0px_#222]
+              p-5 space-y-4
             "
                             >
-                                <div>
-                                    <label className="label">Page Title</label>
+                                {/* Page title */}
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-bold uppercase tracking-widest text-[#222]">
+                                        Page {pIndex + 1} Title
+                                    </label>
                                     <input
                                         value={page.title}
                                         onChange={(e) => {
@@ -274,20 +480,35 @@ export default function CreatePage() {
                                             updated[pIndex].title = e.target.value;
                                             setPages(updated);
                                         }}
-                                        className="input"
+                                        className="
+                  w-full px-4 py-3 text-sm font-semibold text-[#222]
+                  bg-[#FAF3E1] rounded-xl
+                  border-2 border-[#222]
+                  shadow-[3px_3px_0px_0px_#222]
+                  placeholder:text-[#aaa] placeholder:font-normal
+                  focus:outline-none focus:shadow-none focus:translate-x-[1px] focus:translate-y-[1px]
+                  transition-all duration-100
+                "
+                                        placeholder="Page title..."
                                     />
                                 </div>
 
                                 {/* Sections */}
-                                <div className="space-y-3">
+                                <div className="space-y-2.5">
                                     {page.sections.map((section: any, sIndex: number) => (
-                                        <div key={sIndex} className="flex gap-3 items-start">
+                                        <div key={sIndex} className="flex gap-2.5 items-center">
                                             <select
+                                                title="meow"
                                                 value={section.type}
-                                                onChange={(e) =>
-                                                    updateSection(pIndex, sIndex, "type", e.target.value)
-                                                }
-                                                className="input w-[140px]"
+                                                onChange={(e) => updateSection(pIndex, sIndex, "type", e.target.value)}
+                                                className="
+                      px-3 py-2.5 text-xs font-bold uppercase tracking-wide text-[#222]
+                      bg-[#F5E7C6] rounded-lg appearance-none cursor-pointer
+                      border-2 border-[#222]
+                      shadow-[3px_3px_0px_0px_#222]
+                      focus:outline-none focus:shadow-none focus:translate-x-[1px] focus:translate-y-[1px]
+                      transition-all duration-100 w-[110px] shrink-0
+                    "
                                             >
                                                 <option value="text">Text</option>
                                                 <option value="highlight">Code</option>
@@ -296,10 +517,16 @@ export default function CreatePage() {
 
                                             <input
                                                 value={section.content}
-                                                onChange={(e) =>
-                                                    updateSection(pIndex, sIndex, "content", e.target.value)
-                                                }
-                                                className="input flex-1"
+                                                onChange={(e) => updateSection(pIndex, sIndex, "content", e.target.value)}
+                                                className="
+                      flex-1 px-4 py-2.5 text-sm font-semibold text-[#222]
+                      bg-[#FAF3E1] rounded-lg
+                      border-2 border-[#222]
+                      shadow-[3px_3px_0px_0px_#222]
+                      placeholder:text-[#aaa] placeholder:font-normal
+                      focus:outline-none focus:shadow-none focus:translate-x-[1px] focus:translate-y-[1px]
+                      transition-all duration-100
+                    "
                                                 placeholder="Content..."
                                             />
                                         </div>
@@ -308,37 +535,67 @@ export default function CreatePage() {
 
                                 <Button
                                     onClick={() => addSection(pIndex)}
-                                    className="btn-secondary"
+                                    className="
+                px-4 py-2 text-xs font-bold uppercase tracking-widest
+                bg-[#F5E7C6] text-[#222]
+                border-2 border-[#222] rounded-lg
+                shadow-[3px_3px_0px_0px_#222]
+                hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]
+                transition-all duration-100
+              "
                                 >
                                     + Add Section
                                 </Button>
                             </div>
                         ))}
 
-                        <Button onClick={addPage} className="btn-secondary">
+                        <Button
+                            onClick={addPage}
+                            className="
+            px-5 py-2.5 text-xs font-bold uppercase tracking-widest
+            bg-white text-[#222]
+            border-2 border-[#222] rounded-xl
+            shadow-[4px_4px_0px_0px_#222]
+            hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]
+            transition-all duration-100
+          "
+                        >
                             + Add Page
                         </Button>
-                    </div>
+                    </section>
 
-                    {/* Submit */}
-                    <Button onClick={handleSubmit} className="btn-primary w-full">
+                    {/* ── Submit ── */}
+                    <Button
+                        onClick={handleSubmit}
+                        className="
+          w-full py-4 text-sm font-extrabold uppercase tracking-widest
+          bg-[#222] text-[#FAF3E1]
+          border-2 border-[#222] rounded-xl
+          shadow-[6px_6px_0px_0px_#FF6D1F]
+          hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px]
+          transition-all duration-150
+        "
+                    >
                         Create Book
                     </Button>
+
                 </Card>
             </div>
-            <FlipbookPreview
-                data={{
-                    name: form.name,
-                    author: form.author,
-                    description: form.description,
-                    duration: form.duration,
-                    variant: form.difficulty,
-                    tags: form.tags.split(",").filter(Boolean),
-                    pages: pages
-                }}
-            />
 
-           
+
+            <div className="p-10 rounded-xl">
+                <FlipbookPreview
+                    data={{
+                        name: form.name,
+                        author: form.author,
+                        description: form.description,
+                        duration: form.duration,
+                        variant: form.difficulty,
+                        tags: form.tags.split(",").filter(Boolean),
+                        pages: pages
+                    }}
+                />
+            </div>
         </main>
     );
 }

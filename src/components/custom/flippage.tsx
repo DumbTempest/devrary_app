@@ -266,7 +266,7 @@ export default function Flipbook({
   return (
     <main
       ref={containerRef}
-      className="h-full w-full bg-black flex items-center justify-center relative overflow-hidden"
+      className="h-full w-full bg-black flex items-center justify-center relative overflow-hidden rounded-lg"
     >
 
       {/* ── Top-right: read aloud + close ── */}
@@ -274,7 +274,7 @@ export default function Flipbook({
   px-3 py-2 rounded-xl 
   bg-black/40 backdrop-blur-md 
   border border-white/20 
-  shadow-lg shadow-black/30">
+  shadow-lg shadow-black/30 rounded-lg">
 
         {/* Bookmark */}
         <button
