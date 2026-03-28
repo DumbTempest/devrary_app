@@ -87,6 +87,7 @@ export default function Shelf({
     const { scene } = useGLTF("/models/bookshelf.glb");
     const groupRef = useRef<THREE.Group>(null);
     const textRef = useRef<any>(null);
+    const textDefaultQuaternionRef = useRef<THREE.Quaternion | null>(null);
     const bannerGroupRef = useRef<THREE.Group>(null);
     const { camera } = useThree();
 
@@ -244,6 +245,13 @@ export default function Shelf({
 }, [selectedIndex, index]);
 
 
+    useEffect(() => {
+        if (textRef.current && !textDefaultQuaternionRef.current) {
+            textDefaultQuaternionRef.current = textRef.current.quaternion.clone();
+        }
+    }, []);
+
+
 
     useFrame(() => {
         if (innerMesh && outerMesh && originalTransforms.current.inner) {
@@ -273,7 +281,13 @@ export default function Shelf({
         }
 
         if (textRef.current) {
-            textRef.current.quaternion.copy(camera.quaternion);
+            const isOverviewMode = selectedIndex === null;
+
+            if (isOverviewMode) {
+                textRef.current.quaternion.copy(camera.quaternion);
+            } else if (textDefaultQuaternionRef.current) {
+                textRef.current.quaternion.copy(textDefaultQuaternionRef.current);
+            }
         }
     });
 

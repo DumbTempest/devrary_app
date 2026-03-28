@@ -51,7 +51,8 @@ export default function SearchPage() {
 
   const handleNavigate = (id: string) => {
     const parts = id.split("-");
-    const shelfIndex = parts[parts.length - 2];
+    console.log(parts);
+    const shelfIndex = parts[parts.length - 1];
 
     router.push(
       `/library/web-dev?shelf=${Number(shelfIndex) + 1}&bookId=${id}`
