@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/custom/navbar";
-import { FlipbookPreview } from "@/components/custom/flippage";
+import { FlipbookPreview } from "@/components/custom/flipbook_preview";
 import AnimatedSkyNoBirds from "@/components/custom/animated-sky-no-birds";
 
 const PRESET_TAGS = [

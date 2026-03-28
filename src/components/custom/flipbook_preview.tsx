@@ -1,14 +1,15 @@
-"use client";
-
-import React, { useRef, useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import HTMLFlipBookBase from "react-pageflip";
-import Image from "next/image";
-import booksData from "../../../config.json";
-import { useSession } from "next-auth/react";
 import { Cover } from "./cover";
 import { Page } from "./page";
 
 const HTMLFlipBook = HTMLFlipBookBase as any;
+
+const BOOK_W = 1200; 
+const BOOK_H = 700;
+const ZOOM_STEP = 0.1;
+const ZOOM_MIN = 0.3;
+const ZOOM_MAX = 2.0;
 
 type PageSection = {
   type: "text" | "list" | "highlight";
@@ -30,22 +31,11 @@ type BookData = {
   BackcoverImage?: string;
 };
 
-
-/* ───────────── FLIPBOOK ───────────── */
-const BOOK_W = 1200; // two pages side by side
-const BOOK_H = 700;
-const ZOOM_STEP = 0.1;
-const ZOOM_MIN = 0.3;
-const ZOOM_MAX = 2.0;
-
-export default function Flipbook({
-  bookId,
-  onClose,
+export function FlipbookPreview({
+  data
 }: {
-  bookId: string;
-  onClose?: () => void;
+  data: BookData;
 }) {
-  const { data: session, status } = useSession();
   const flipBookRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -53,28 +43,6 @@ export default function Flipbook({
   const [bookMeta, setBookData] = useState<BookData | null>(null);
   const [totalPages, setTotalPages] = useState(0);
   const [zoom, setZoom] = useState(1);
-  const [bookmarks, setBookmarks] = useState<string[]>([]);
-
-  useEffect(() => {
-    const fetchBookmarks = async () => {
-      try {
-        const res = await fetch("/api/bookmarks/all");
-        const data = await res.json();
-
-        if (res.ok) {
-          setBookmarks(data.bookmarks || []);
-        }
-      } catch (err) {
-        console.error("Failed to fetch bookmarks:", err);
-      }
-    };
-    if (status === "authenticated") {
-      fetchBookmarks();
-    }
-  }, []);
-  const isBookmarked = (bookId: string) => {
-    return bookmarks.includes(bookId);
-  };
 
   // Auto-fit zoom whenever container or book changes
   const computeFit = () => {
@@ -119,25 +87,15 @@ export default function Flipbook({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") flipNext();
       if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") flipPrev();
-      if (e.key === "Escape") onClose?.();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, []);
 
   useEffect(() => {
-    const fetchBookData = async () => {
-      const res = await fetch(`/api/books/${bookId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setBookData(data);
-        setTotalPages(data.pages.length + 2); // cover + pages + back cover
-      } else {
-        console.error("Failed to fetch book data");
-      }
-    };
-    fetchBookData();
-  }, [bookId]);
+    setBookData(data);
+    setTotalPages(data.pages.length + 2); // cover + pages + back cover 
+  }, [data]);
 
   if (!bookMeta) {
     return (
@@ -147,32 +105,6 @@ export default function Flipbook({
       </div>
     );
   }
-
-  const toggleBookmark = async (bookId: string) => {
-    const isSaved = bookmarks.includes(bookId);
-
-    // ✅ optimistic UI update
-    setBookmarks((prev) =>
-      isSaved
-        ? prev.filter((id) => id !== bookId)
-        : [...prev, bookId]
-    );
-
-    try {
-      await fetch("/api/bookmarks", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          bookId,
-          action: isSaved ? "remove" : "add",
-        }),
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   const speakCurrentPage = () => {
     if (!flipBookRef.current) return;
@@ -196,7 +128,7 @@ export default function Flipbook({
   return (
     <main
       ref={containerRef}
-      className="h-full w-full bg-black flex items-center justify-center relative overflow-hidden rounded-lg"
+      className="h-full w-full bg-black flex items-center justify-center relative overflow-hidden"
     >
 
       {/* ── Top-right: read aloud + close ── */}
@@ -204,21 +136,7 @@ export default function Flipbook({
   px-3 py-2 rounded-xl 
   bg-black/40 backdrop-blur-md 
   border border-white/20 
-  shadow-lg shadow-black/30 rounded-lg">
-
-        {/* Bookmark */}
-        {status === "authenticated" && (
-          <button
-            onClick={() => toggleBookmark(bookId)}
-            className={`px-3 py-1.5 rounded-lg font-semibold text-sm transition 
-    ${isBookmarked(bookId)
-                ? "bg-green-500 text-white"
-                : "bg-white/80 text-black hover:bg-white"
-              }`}
-          >
-            {isBookmarked(bookId) ? "✅ Saved" : "Save"}
-          </button>
-        )}
+  shadow-lg shadow-black/30">
 
         {/* Read aloud / Stop */}
         {!speaking ? (
