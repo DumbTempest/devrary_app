@@ -4,10 +4,9 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   OrbitControls,
   useGLTF,
-  Clone,
   Text,
 } from "@react-three/drei";
-import { Suspense, useRef, useState, useMemo } from "react";
+import { Suspense, useRef, useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import * as THREE from "three";
@@ -38,6 +37,80 @@ function RoomModel({
   const { scene } = useGLTF("/models/rooms.glb");
   const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
+
+  const { outlinedScene, roomShellOutline } = useMemo(() => {
+    const cloned = scene.clone(true);
+    const bounds = new THREE.Box3().setFromObject(cloned);
+
+    const minX = bounds.min.x;
+    const minY = bounds.min.y;
+    const minZ = bounds.min.z;
+    const maxX = bounds.max.x;
+    const maxY = bounds.max.y;
+    const maxZ = bounds.max.z;
+
+    const points: number[] = [];
+    const addLine = (
+      x1: number,
+      y1: number,
+      z1: number,
+      x2: number,
+      y2: number,
+      z2: number
+    ) => {
+      points.push(x1, y1, z1, x2, y2, z2);
+    };
+
+    // Bottom face
+    addLine(minX, minY, minZ, maxX, minY, minZ);
+    addLine(maxX, minY, minZ, maxX, minY, maxZ);
+    addLine(maxX, minY, maxZ, minX, minY, maxZ);
+    addLine(minX, minY, maxZ, minX, minY, minZ);
+
+    // Top face
+    addLine(minX, maxY, minZ, maxX, maxY, minZ);
+    addLine(maxX, maxY, minZ, maxX, maxY, maxZ);
+    
+
+    // Vertical edges
+    addLine(minX, minY, minZ, minX, maxY, minZ);
+    addLine(maxX, minY, minZ, maxX, maxY, minZ);
+    addLine(maxX, minY, maxZ, maxX, maxY, maxZ);
+    
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(points, 3));
+
+    const outlineGroup = new THREE.Group();
+    const strokeScales = [1, 1.004, 0.996];
+
+    strokeScales.forEach((scaleFactor) => {
+      const stroke = new THREE.LineSegments(
+        geometry.clone(),
+        new THREE.LineBasicMaterial({ color: "#000000" })
+      );
+      stroke.name = "__room_outline__";
+      stroke.renderOrder = 2;
+      stroke.scale.setScalar(scaleFactor);
+      outlineGroup.add(stroke);
+    });
+
+    geometry.dispose();
+
+    return { outlinedScene: cloned, roomShellOutline: outlineGroup };
+  }, [scene]);
+
+  useEffect(() => {
+    return () => {
+      roomShellOutline.traverse((child) => {
+        if (child.name !== "__room_outline__") return;
+
+        const lines = child as THREE.LineSegments;
+        lines.geometry.dispose();
+        (lines.material as THREE.Material).dispose();
+      });
+    };
+  }, [roomShellOutline]);
 
   useFrame((state) => {
     if (!groupRef.current) return;
@@ -72,7 +145,8 @@ function RoomModel({
         document.body.style.cursor = "default";
       }}
     >
-      <Clone object={scene} />
+      <primitive object={outlinedScene} />
+      <primitive object={roomShellOutline} />
 
       <Text
         position={[8, 5, 0]}
