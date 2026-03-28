@@ -3,8 +3,8 @@ import mongoose, { Schema, model, models, Model } from "mongoose";
 export interface IUser {
   email: string;
   name: string;
-  role: string;
   profilePicture?: string;
+  role: string;
   bookmarks: string[];
   createdAt?: Date;
   updatedAt?: Date;
@@ -35,7 +35,7 @@ const UserSchema = new Schema<IUser>(
       type: String,
     },
     role: {
-      type: [String],
+      type: String,
       enum: ["user", "admin"],
       default: "user",
     },

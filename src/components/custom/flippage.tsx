@@ -161,7 +161,7 @@ export default function Flipbook({
   useEffect(() => {
     const fetchBookmarks = async () => {
       try {
-        const res = await fetch("/api/user/bookmarks/all");
+        const res = await fetch("/api/bookmarks/all");
         const data = await res.json();
 
         if (res.ok) {

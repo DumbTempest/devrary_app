@@ -73,6 +73,7 @@ export const options: AuthOptions = {
                     session.user.name = dbUser.name;
                     session.user.email = dbUser.email;
                     session.user.image = dbUser.profilePicture;
+                    session.user.role = dbUser.role;
                 }
             }
 
@@ -81,7 +82,7 @@ export const options: AuthOptions = {
     },
 
     pages: {
-        signIn: "/login",
+        signIn: "/",
         signOut: "/",
         error: "/auth/error",
     },

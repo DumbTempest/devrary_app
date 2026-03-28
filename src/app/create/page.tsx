@@ -58,16 +58,8 @@ export default function CreatePage() {
         setPages(updated);
     };
 
-    const generateId = () => {
-        const base = `${form.difficulty}b${1}-${form.domain}-0`;
-        return base.toLowerCase();
-    };
-
     const handleSubmit = async () => {
-        const id = generateId();
-
         const payload = {
-            _id: id,
             ...form,
             tags: form.tags.split(",").map((t) => t.trim()),
             pages,
@@ -75,7 +67,7 @@ export default function CreatePage() {
 
         console.log("Payload:", payload);
 
-        await fetch("/api/books", {
+        await fetch("/api/books/create", {
             method: "POST",
             body: JSON.stringify(payload),
             headers: { "Content-Type": "application/json" },

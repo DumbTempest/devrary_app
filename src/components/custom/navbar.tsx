@@ -176,6 +176,19 @@ export default function Navbar() {
               >
                 Create Books
               </button>
+              {session.user.role === "admin" && (
+                <button
+                  onClick={() => router.push("/approve-books")}
+                  className="
+                    w-full text-left px-4 py-3
+                    font-bold
+                    hover:bg-[#FF6D1F] hover:text-white
+                  transition-all
+                "
+                >
+                  Approve Books
+                </button>
+              )}
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
                 className="

@@ -9,6 +9,7 @@ import Link from "next/link";
 export default function BookmarksPage() {
   const [bookmarks, setBookmarks] = useState<string[]>([]);
   const [booksData, setBooksData] = useState<Record<string, any>>({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchBookmarks = async () => {
@@ -56,7 +57,7 @@ export default function BookmarksPage() {
 
         await Promise.all(
           bookmarks.map(async (id) => {
-            const bookID = id.split("_")[0]; // Extract bookId from "bookId_pageNo"
+            const bookID = id;
             const res = await fetch(`/api/books/${bookID}`);
             if (res.ok) {
               const data = await res.json();
@@ -68,11 +69,15 @@ export default function BookmarksPage() {
         setBooksData(results);
       } catch (err) {
         console.error("Failed to fetch books:", err);
+      } finally {
+        setLoading(false); // ✅ DONE loading
       }
     };
 
     if (bookmarks.length > 0) {
       fetchBooks();
+    } else {
+      setLoading(false); // no bookmarks → stop loading
     }
   }, [bookmarks]);
 
@@ -124,8 +129,11 @@ export default function BookmarksPage() {
 
           {bookmarks.map((id) => {
             const book = booksData[id];
-            const bookId = id.split("_")[0]; // Extract bookId from "bookId_pageNo"
-            const pageNo = id.split("_")[1]; // Extract pageNo from "bookId_pageNo"
+            const bookId = id
+            const getDomainFromId = (id: string) => {
+              const parts = id.split("-");
+              return parts.slice(1, -1).join("-");
+            };
             if (!book) return null;
 
             return (
@@ -155,7 +163,7 @@ export default function BookmarksPage() {
 
                   <div className="flex gap-3">
                     <Link
-                      href={`/library/web-dev?shelf=1&bookId=${id}`}
+                      href={`/library/${getDomainFromId(id)}?shelf=1&bookId=${id}`}
                     >
                       <Button
                         className="
