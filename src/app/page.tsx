@@ -11,6 +11,32 @@ import Navbar from "@/components/custom/navbar";
 import AnimatedSkyNoBirds from "@/components/custom/animated-sky-no-birds";
 import { AnimatePresence, motion } from "framer-motion";
 import * as THREE from "three";
+import Footer from "@/components/custom/footer";
+/* ---------------- SHARED TRANSITIONS ---------------- */
+
+const EASE = "easeOut" as const;
+
+const fadeUp = {
+  initial: { opacity: 0, y: 24 },
+  animate: { opacity: 1, y: 0 },
+};
+
+const slideIn = (direction: "left" | "right") => ({
+  initial: { opacity: 0, x: direction === "left" ? -60 : 60 },
+  animate: { opacity: 1, x: 0 },
+});
+
+const popIn = {
+  initial: { opacity: 0, scale: 0.92 },
+  animate: { opacity: 1, scale: 1 },
+  exit: { opacity: 0, scale: 0.92 },
+};
+
+const transition = (delay = 0, duration = 0.5) => ({
+  duration,
+  delay,
+  ease: EASE,
+});
 
 /* ---------------- MODEL ---------------- */
 
@@ -33,14 +59,12 @@ function Model({ onHoverChange, onCursorMove, onHoveredBookChange }: ModelProps)
 
   const findBookGroup = (object: THREE.Object3D | null): THREE.Group | null => {
     let current: THREE.Object3D | null = object;
-
     while (current && current.parent) {
       if (bookGroupsRef.current.has(current as THREE.Group)) {
         return current as THREE.Group;
       }
       current = current.parent;
     }
-
     return null;
   };
 
@@ -51,7 +75,6 @@ function Model({ onHoverChange, onCursorMove, onHoveredBookChange }: ModelProps)
     bookBasePositions.current.clear();
     bookHitMeshesRef.current = [];
 
-    // Identify only real book groups via meshes named with the "_1" outer-book pattern.
     modelRef.current.traverse((child) => {
       const mesh = child as THREE.Mesh;
       if (!mesh.isMesh || !mesh.name.endsWith("_1")) return;
@@ -73,7 +96,6 @@ function Model({ onHoverChange, onCursorMove, onHoveredBookChange }: ModelProps)
     };
   }, [scene]);
 
-  // Animate hovered book group slightly outward and return all others smoothly.
   useFrame((state) => {
     const popOutDistance = 0.06;
     const animationSpeed = 0.045;
@@ -127,10 +149,8 @@ function Model({ onHoverChange, onCursorMove, onHoveredBookChange }: ModelProps)
             parentWorldQuaternion.invert()
           );
 
-          // Keep movement along shelf depth only, so books come out instead of drifting up/sideways.
           localDelta.x = 0;
           localDelta.y = 0;
-
           targetPosition.add(localDelta);
         }
       }
@@ -228,7 +248,6 @@ export default function Home() {
 
   const pickRandomQuote = (current: { command: string; description: string }) => {
     if (developerQuotes.length === 1) return developerQuotes[0];
-
     let next = current;
     while (next.command === current.command) {
       next = developerQuotes[Math.floor(Math.random() * developerQuotes.length)];
@@ -240,9 +259,7 @@ export default function Home() {
     let timer: ReturnType<typeof setTimeout> | null = null;
 
     if (isHoveringBook) {
-      timer = setTimeout(() => {
-        setShowThoughtBubble(true);
-      }, 500);
+      timer = setTimeout(() => setShowThoughtBubble(true), 500);
     } else {
       setShowThoughtBubble(false);
     }
@@ -254,34 +271,27 @@ export default function Home() {
 
   useEffect(() => {
     if (!hoveredBookKey) return;
-
-    // Change snippet whenever hovering a different book.
     setActiveQuote((current) => pickRandomQuote(current));
   }, [hoveredBookKey]);
 
   useEffect(() => {
     if (!showThoughtBubble || !hoveredBookKey) return;
-
-    // Keep snippets fresh while hovering the same book.
     const rotateTimer = setInterval(() => {
       setActiveQuote((current) => pickRandomQuote(current));
     }, 3200);
-
-    return () => {
-      clearInterval(rotateTimer);
-    };
+    return () => clearInterval(rotateTimer);
   }, [showThoughtBubble, hoveredBookKey]);
 
   return (
     <>
       <AnimatedSkyNoBirds />
+
+      {/* Thought bubble */}
       <AnimatePresence>
         {showThoughtBubble && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.92 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            {...popIn}
+            transition={transition(0, 0.2)}
             className="fixed z-70 pointer-events-none"
             style={{
               left: `clamp(210px, ${cursorPosition.x}px, calc(100vw - 210px))`,
@@ -289,9 +299,7 @@ export default function Home() {
             }}
           >
             <div className="relative">
-              <div
-                className="absolute left-1/2 -translate-x-1/2 -translate-y-full -top-6 w-96 px-5 py-4 rounded-3xl bg-linear-to-b from-white to-slate-50 border-2 border-black shadow-[6px_6px_0px_0px_#222222]"
-              >
+              <div className="absolute left-1/2 -translate-x-1/2 -translate-y-full -top-6 w-96 px-5 py-4 rounded-3xl bg-linear-to-b from-white to-slate-50 border-2 border-black shadow-[6px_6px_0px_0px_#222222]">
                 <p className="text-[12px] leading-snug text-[#111827] font-semibold whitespace-pre-line font-mono bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 mb-2">
                   {activeQuote.command}
                 </p>
@@ -306,112 +314,82 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Page wrapper */}
       <motion.main
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
+        {...fadeUp}
+        transition={transition(0, 0.5)}
         className="relative h-screen w-full p-10 font-tektur overflow-hidden"
       >
         <Navbar />
 
-      <div className="grid grid-cols-2 gap-16 items-start">
+        <div className="grid grid-cols-2 gap-16 items-start">
 
-        {/* LEFT CARD */}
-        <motion.div
-          initial={{ x: -80, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="ml-20 mt-20"
-        >
+          {/* LEFT CARD */}
           <motion.div
-            animate={{ y: [0, -8, 0] }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
+            {...slideIn("left")}
+            transition={transition(0.15)}
+            className="ml-20 mt-20"
           >
-            <Card
-              className="
-                bg-[#F5E7C6]
-                border-4 border-[#222222]
-                rounded-[40px]
-                shadow-[12px_12px_0px_0px_#222222]
-                p-12
-                max-w-xl
-              "
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             >
-              <h1 className="text-5xl font-bold mb-6 text-[#222222]">
-                Devrary
-              </h1>
-
-              <p className="text-xl mb-10 text-[#222222]">
-  Discover coding concepts inside a structured virtual library. 
-  Walk through domains, browse languages, and open curated resources 
-  designed to make learning clear and accessible.
-</p>
-
-              <Link href="/room">
-                <motion.div
-                  whileHover={{ scale: 1.08 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button
-                    className="
-                      bg-[#FF6D1F]
-                      text-white
-                      border-4 border-[#222222]
-                      rounded-2xl
-                      shadow-[6px_6px_0px_0px_#222222]
-                      font-bold
-                      px-10 py-5
-                      active:translate-x-1
-                      active:translate-y-1
-                      active:shadow-none
-                      transition-all
-                    "
+              <Card className="bg-[#F5E7C6] border-4 border-[#222222] rounded-[40px] shadow-[12px_12px_0px_0px_#222222] p-12 max-w-xl">
+                <h1 className="text-5xl font-bold mb-6 text-[#222222]">
+                  Devrary
+                </h1>
+                <p className="text-xl mb-10 text-[#222222]">
+                  Discover coding concepts inside a structured virtual library.
+                  Walk through domains, browse languages, and open curated resources
+                  designed to make learning clear and accessible.
+                </p>
+                <Link href="/room">
+                  <motion.div
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ duration: 0.15, ease: EASE }}
                   >
-                    Start learning
-                  </Button>
-                </motion.div>
-              </Link>
-            </Card>
+                    <Button className="bg-[#FF6D1F] text-white border-4 border-[#222222] rounded-2xl shadow-[6px_6px_0px_0px_#222222] font-bold px-10 py-5 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all">
+                      Start learning
+                    </Button>
+                  </motion.div>
+                </Link>
+              </Card>
+            </motion.div>
           </motion.div>
-        </motion.div>
 
-        {/* RIGHT MODEL AREA */}
-        <motion.div
-          initial={{ x: 80, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="h-[650px] w-full relative"
-        >
-          <Link href="/room">
-          <Canvas
-            className="w-full h-full"
-            camera={{ position: [3, 3, 4], fov: 50 }}
-            onPointerMissed={() => {
-              document.body.style.cursor = "default";
-            }}
+          {/* RIGHT MODEL AREA */}
+          <motion.div
+            {...slideIn("right")}
+            transition={transition(0.3)}
+            className="h-[650px] w-full relative"
           >
-            <ambientLight intensity={1} />
-            <directionalLight position={[5, 5, 5]} intensity={1.2} />
+            <Link href="/room">
+              <Canvas
+                className="w-full h-full"
+                camera={{ position: [3, 3, 4], fov: 50 }}
+                onPointerMissed={() => {
+                  document.body.style.cursor = "default";
+                }}
+              >
+                <ambientLight intensity={1} />
+                <directionalLight position={[5, 5, 5]} intensity={1.2} />
+                <Suspense fallback={null}>
+                  <Model
+                    onHoverChange={setIsHoveringBook}
+                    onCursorMove={(x, y) => setCursorPosition({ x, y })}
+                    onHoveredBookChange={setHoveredBookKey}
+                  />
+                </Suspense>
+                <OrbitControls enableZoom={true} enableRotate={false} enablePan={false} />
+              </Canvas>
+            </Link>
+          </motion.div>
 
-            <Suspense fallback={null}>
-              <Model
-                onHoverChange={setIsHoveringBook}
-                onCursorMove={(x, y) => setCursorPosition({ x, y })}
-                onHoveredBookChange={setHoveredBookKey}
-              />
-            </Suspense>
-
-            <OrbitControls enableZoom={true} enableRotate={false} enablePan={false} />
-          </Canvas>
-          </Link>
-        </motion.div>
-
-      </div>
-    </motion.main>
+        </div>
+      </motion.main>
+      {/* <Footer /> */}
     </>
   );
 }
