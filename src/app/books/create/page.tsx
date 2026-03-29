@@ -20,30 +20,66 @@ const PRESET_TAGS = [
     "linux", "bash", "git", "github", "open-source", "system-design", "scalability", "microservices", "event-driven", "architecture"
 ];
 
+type SectionType = "text" | "highlight" | "list";
+
+type BookSection = {
+    type: SectionType;
+    content: string;
+};
+
+type BookPage = {
+    title: string;
+    sections: BookSection[];
+};
+
 export default function CreatePage() {
     const [form, setForm] = useState({
-        name: "",
-        description: "",
-        author: "",
-        duration: "",
+        name: "JavaScript Fundamentals",
+        description: "A beginner-friendly guide to JavaScript basics, syntax, and core programming concepts.",
+        author: "Devrary Team",
+        duration: "2h 30m",
         difficulty: "l1",
         domain: "web-dev",
-        tags: "",
+        tags: "javascript,webdev,beginner",
     });
 
-    const [pages, setPages] = useState<any[]>([
+    const [pages, setPages] = useState<BookPage[]>([
         {
-            title: "",
-            sections: [{ type: "text", content: "" }],
+            title: "Introduction to JavaScript",
+            sections: [{ type: "text", content: "JavaScript is a versatile language used for building interactive web applications." }],
         },
     ]);
+
+    const [submitting, setSubmitting] = useState(false);
+    const [modal, setModal] = useState<{
+        open: boolean;
+        title: string;
+        message: string;
+        success: boolean;
+    }>({
+        open: false,
+        title: "",
+        message: "",
+        success: false,
+    });
 
     const handleChange = (key: string, value: string) => {
         setForm((prev) => ({ ...prev, [key]: value }));
     };
 
     const addPage = () => {
-        setPages([...pages, { title: "", sections: [{ type: "text", content: "" }] }]);
+        setPages([
+            ...pages,
+            {
+                title: `New Page ${pages.length + 1}`,
+                sections: [{ type: "text", content: "Write your section content here..." }],
+            },
+        ]);
+    };
+
+    const removePage = (pageIndex: number) => {
+        if (pages.length <= 1) return;
+        setPages(pages.filter((_, index) => index !== pageIndex));
     };
 
     const addSection = (pageIndex: number) => {
@@ -52,26 +88,60 @@ export default function CreatePage() {
         setPages(updated);
     };
 
-    const updateSection = (pIndex: number, sIndex: number, key: string, value: any) => {
+    const updateSection = (pIndex: number, sIndex: number, key: "type" | "content", value: string) => {
         const updated = [...pages];
-        updated[pIndex].sections[sIndex][key] = value;
+        if (key === "type") {
+            updated[pIndex].sections[sIndex].type = value as SectionType;
+        } else {
+            updated[pIndex].sections[sIndex].content = value;
+        }
         setPages(updated);
     };
 
     const handleSubmit = async () => {
+        setSubmitting(true);
         const payload = {
             ...form,
-            tags: form.tags.split(",").map((t) => t.trim()),
+            tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
             pages,
         };
 
         console.log("Payload:", payload);
 
-        await fetch("/api/books/create", {
-            method: "POST",
-            body: JSON.stringify(payload),
-            headers: { "Content-Type": "application/json" },
-        });
+        try {
+            const res = await fetch("/api/books/create", {
+                method: "POST",
+                body: JSON.stringify(payload),
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                setModal({
+                    open: true,
+                    title: "Submission Failed",
+                    message: err?.error || "Could not create the book. Please try again.",
+                    success: false,
+                });
+                return;
+            }
+
+            setModal({
+                open: true,
+                title: "Book Submitted",
+                message: "Your book was created successfully.",
+                success: true,
+            });
+        } catch {
+            setModal({
+                open: true,
+                title: "Network Error",
+                message: "Something went wrong while submitting. Please retry.",
+                success: false,
+            });
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -98,6 +168,7 @@ export default function CreatePage() {
                             <div className="flex flex-col gap-1.5">
                                 <label className="text-xs font-bold uppercase tracking-widest text-[#222]">Name</label>
                                 <input
+                                    value={form.name}
                                     className="
                 w-full px-4 py-3 text-sm font-semibold text-[#222]
                 bg-white rounded-xl
@@ -116,6 +187,7 @@ export default function CreatePage() {
                             <div className="flex flex-col gap-1.5">
                                 <label className="text-xs font-bold uppercase tracking-widest text-[#222]">Author</label>
                                 <input
+                                    value={form.author}
                                     className="
                 w-full px-4 py-3 text-sm font-semibold text-[#222]
                 bg-white rounded-xl
@@ -134,6 +206,7 @@ export default function CreatePage() {
                             <div className="col-span-2 flex flex-col gap-1.5">
                                 <label className="text-xs font-bold uppercase tracking-widest text-[#222]">Description</label>
                                 <textarea
+                                    value={form.description}
                                     rows={3}
                                     className="
                 w-full px-4 py-3 text-sm font-semibold text-[#222]
@@ -153,6 +226,7 @@ export default function CreatePage() {
                             <div className="flex flex-col gap-1.5">
                                 <label className="text-xs font-bold uppercase tracking-widest text-[#222]">Duration</label>
                                 <input
+                                    value={form.duration}
                                     className="
                 w-full px-4 py-3 text-sm font-semibold text-[#222]
                 bg-white rounded-xl
@@ -270,6 +344,7 @@ export default function CreatePage() {
                                 <label className="text-xs font-bold uppercase tracking-widest text-[#222]">Difficulty</label>
                                 <select
                                 title="meow"
+                                    value={form.difficulty}
                                     className="
                 w-full px-4 py-3 text-sm font-semibold text-[#222]
                 bg-white rounded-xl appearance-none cursor-pointer
@@ -292,6 +367,7 @@ export default function CreatePage() {
                                 <label className="text-xs font-bold uppercase tracking-widest text-[#222]">Domain</label>
                                 <select
                                 title="meow"
+                                    value={form.domain}
                                     className="
                 w-full px-4 py-3 text-sm font-semibold text-[#222]
                 bg-white rounded-xl appearance-none cursor-pointer
@@ -489,7 +565,7 @@ export default function CreatePage() {
 
                                 {/* Sections */}
                                 <div className="space-y-2.5">
-                                    {page.sections.map((section: any, sIndex: number) => (
+                                    {page.sections.map((section: BookSection, sIndex: number) => (
                                         <div key={sIndex} className="flex gap-2.5 items-center">
                                             <select
                                                 title="meow"
@@ -540,6 +616,22 @@ export default function CreatePage() {
                                 >
                                     + Add Section
                                 </Button>
+
+                                <Button
+                                    onClick={() => removePage(pIndex)}
+                                    disabled={pages.length <= 1}
+                                    className="
+                px-4 py-2 text-xs font-bold uppercase tracking-widest
+                bg-[#FFD6D6] text-[#222]
+                border-2 border-[#222] rounded-lg
+                shadow-[3px_3px_0px_0px_#222]
+                hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]
+                transition-all duration-100
+                disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[3px_3px_0px_0px_#222]
+              "
+                                >
+                                    Remove Page
+                                </Button>
                             </div>
                         ))}
 
@@ -561,6 +653,7 @@ export default function CreatePage() {
                     {/* ── Submit ── */}
                     <Button
                         onClick={handleSubmit}
+                        disabled={submitting}
                         className="
           w-full py-4 text-sm font-extrabold uppercase tracking-widest
           bg-[#222] text-[#FAF3E1]
@@ -570,7 +663,7 @@ export default function CreatePage() {
           transition-all duration-150
         "
                     >
-                        Create Book
+                        {submitting ? "Submitting..." : "Create Book"}
                     </Button>
 
                 </Card>
@@ -590,6 +683,32 @@ export default function CreatePage() {
                     }}
                 />
             </div>
+
+            {modal.open && (
+                <div className="fixed inset-0 z-[120] bg-black/50 flex items-center justify-center p-4">
+                    <div className="w-full max-w-md bg-[#F5E7C6] border-4 border-[#222] rounded-3xl shadow-[10px_10px_0px_0px_#222] p-6 space-y-4">
+                        <h3 className={`text-2xl font-extrabold ${modal.success ? "text-[#166534]" : "text-[#991b1b]"}`}>
+                            {modal.title}
+                        </h3>
+                        <p className="text-sm font-semibold text-[#222]">{modal.message}</p>
+                        <div className="flex justify-end">
+                            <Button
+                                onClick={() => setModal((prev) => ({ ...prev, open: false }))}
+                                className="
+                  px-5 py-2.5 text-xs font-bold uppercase tracking-widest
+                  bg-white text-[#222]
+                  border-2 border-[#222] rounded-xl
+                  shadow-[4px_4px_0px_0px_#222]
+                  hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]
+                  transition-all duration-100
+                "
+                            >
+                                OK
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     </>
     );

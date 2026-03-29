@@ -136,8 +136,12 @@ export function FlipbookPreview({
   }, []);
 
   useEffect(() => {
-    setBookData(data);
-    setTotalPages(data.pages.length + 2);
+    const safePages = Array.isArray(data?.pages) ? data.pages : [];
+    setBookData({
+      ...data,
+      pages: safePages,
+    });
+    setTotalPages(safePages.length + 2);
   }, [data]);
 
   if (!bookMeta) {
@@ -171,6 +175,10 @@ export function FlipbookPreview({
     speechSynthesis.cancel();
     setSpeaking(false);
   };
+
+  // react-pageflip can throw DOM insertion errors when children count changes;
+  // remounting on page-count changes keeps its internal tree in sync.
+  const flipbookKey = `${bookMeta.pages.length}-${bookMeta.name}-${bookMeta.author}`;
 
   return (
     <main
@@ -229,6 +237,7 @@ export function FlipbookPreview({
         }}
       >
         <HTMLFlipBook
+          key={flipbookKey}
           ref={flipBookRef}
           width={600}
           height={700}
