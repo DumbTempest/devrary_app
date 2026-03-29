@@ -41,7 +41,7 @@ const LANGUAGE_COVER_MAP: Record<string, string> = {
   js: "/covers/back-js-yellow.svg",
   typescript: "/covers/back-ts-blue.svg",
   ts: "/covers/back-ts-blue.svg",
-  go: "/covers/back-go-green.svg",
+  go: "/covers/go.png",
   rust: "/covers/back-rust-orange.svg",
   "c++": "/covers/c++.jpg",
   cpp: "/covers/c++.jpg",
@@ -289,14 +289,19 @@ export default function Flipbook({
 
   const language = getBookLanguage(bookMeta);
   const languageCover = getLanguageCover(bookMeta);
+  const isGoBook = language === "go";
   const frontCoverImage =
-    bookMeta.CoverImage || languageCover || "/covers/default-cover.png";
+    isGoBook
+      ? "/covers/go.png"
+      : bookMeta.CoverImage || languageCover || "/covers/default-cover.png";
   const colorBackCover = language ? BACK_COVER_COLOR_MAP[language] : undefined;
   const backCoverImage =
-    bookMeta.BackcoverImage ||
-    colorBackCover ||
-    languageCover ||
-    "/covers/default-cover.png";
+    isGoBook
+      ? "/covers/go.png"
+      : bookMeta.BackcoverImage ||
+        colorBackCover ||
+        languageCover ||
+        "/covers/default-cover.png";
 
   return (
     <main

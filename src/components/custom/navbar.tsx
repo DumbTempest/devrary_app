@@ -179,7 +179,7 @@ export default function Navbar() {
                 Profile
               </button>
               <button
-                onClick={() => router.push("//books/create")}
+                onClick={() => router.push("/books/create")}
                 className="
                   w-full text-left px-4 py-3
                   font-bold

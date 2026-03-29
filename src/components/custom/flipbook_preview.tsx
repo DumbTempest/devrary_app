@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import HTMLFlipBookBase from "react-pageflip";
 import { Cover } from "./cover";
 import { Page } from "./page";
@@ -22,11 +22,13 @@ type PageSection =
     };
 
 type BookData = {
+  _id?: string;
   name: string;
   description: string;
   author: string;
   duration: string;
   variant: string;
+  language?: string;
   tags: string[];
   pages: Array<{
     title: string;
@@ -35,6 +37,47 @@ type BookData = {
   CoverImage?: string;
   BackcoverImage?: string;
 };
+
+const LANGUAGE_COVER_MAP: Record<string, string> = {
+  javascript: "/covers/back-js-yellow.svg",
+  js: "/covers/back-js-yellow.svg",
+  typescript: "/covers/back-ts-blue.svg",
+  ts: "/covers/back-ts-blue.svg",
+  go: "/covers/go.png",
+  rust: "/covers/back-rust-orange.svg",
+  "c++": "/covers/c++.jpg",
+  cpp: "/covers/c++.jpg",
+  java: "/covers/java.png",
+};
+
+const LANGUAGE_CODE_MAP: Record<string, string> = {
+  "0": "javascript",
+  "1": "typescript",
+  "2": "go",
+  "3": "c++",
+  "4": "rust",
+  "5": "python",
+};
+
+function getBookLanguage(book: BookData): string | null {
+  const normalizedTags = Array.isArray(book.tags)
+    ? book.tags.map((tag) => String(tag).toLowerCase())
+    : [];
+
+  const explicitLanguage = book.language?.toLowerCase();
+  if (explicitLanguage) {
+    return explicitLanguage;
+  }
+
+  const tagLanguage = normalizedTags.find((tag) => LANGUAGE_COVER_MAP[tag]);
+  if (tagLanguage) {
+    return tagLanguage;
+  }
+
+  const trailingCode = book._id?.split("-").pop();
+  const mappedLanguage = trailingCode ? LANGUAGE_CODE_MAP[trailingCode] : undefined;
+  return mappedLanguage || null;
+}
 
 /* ── Reusable neobrutalist button ── */
 const NeoButton = ({
@@ -136,13 +179,25 @@ export function FlipbookPreview({
   }, []);
 
   useEffect(() => {
-    const safePages = Array.isArray(data?.pages) ? data.pages : [];
-    setBookData({
-      ...data,
-      pages: safePages,
-    });
-    setTotalPages(safePages.length + 2);
+    setBookData(data);
+    setTotalPages(data.pages.length + 2);
   }, [data]);
+
+  const flipbookRenderKey = useMemo(() => {
+    return JSON.stringify(
+      (bookMeta?.pages || []).map((page) => ({
+        title: page.title,
+        sections: (page.sections || []).map((section) => ({
+          type: section.type,
+          content: section.content,
+        })),
+      }))
+    );
+  }, [bookMeta]);
+
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [flipbookRenderKey]);
 
   if (!bookMeta) {
     return (
@@ -176,9 +231,14 @@ export function FlipbookPreview({
     setSpeaking(false);
   };
 
-  // react-pageflip can throw DOM insertion errors when children count changes;
-  // remounting on page-count changes keeps its internal tree in sync.
-  const flipbookKey = `${bookMeta.pages.length}-${bookMeta.name}-${bookMeta.author}`;
+  const language = getBookLanguage(bookMeta);
+  const isGoBook = language === "go";
+  const previewFrontCover = isGoBook
+    ? "/covers/go.png"
+    : bookMeta.CoverImage || "/covers/default-cover.png";
+  const previewBackCover = isGoBook
+    ? "/covers/go.png"
+    : bookMeta.BackcoverImage || "/covers/default-cover.png";
 
   return (
     <main
@@ -237,7 +297,7 @@ export function FlipbookPreview({
         }}
       >
         <HTMLFlipBook
-          key={flipbookKey}
+          key={flipbookRenderKey}
           ref={flipBookRef}
           width={600}
           height={700}
@@ -261,7 +321,7 @@ export function FlipbookPreview({
             title={bookMeta.name}
             author={bookMeta.author}
             subtitle={bookMeta.description}
-            coverImage={bookMeta.CoverImage || "/covers/default-cover.png"}
+            coverImage={previewFrontCover}
           />
 
           {bookMeta.pages.map((page, index) => (
@@ -277,7 +337,7 @@ export function FlipbookPreview({
             title="The End"
             subtitle={`Thank you for reading ${bookMeta.name}`}
             author={bookMeta.author}
-            coverImage={bookMeta.BackcoverImage || "/covers/default-cover.png"}
+            coverImage={previewBackCover}
           />
         </HTMLFlipBook>
       </div>

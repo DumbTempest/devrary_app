@@ -17,10 +17,12 @@ const BACK_COVER_COLOR_MAP: Record<string, string> = {
   js: "/covers/back-js-yellow.svg",
   typescript: "/covers/back-ts-blue.svg",
   ts: "/covers/back-ts-blue.svg",
+    go: "/covers/go.png",
   rust: "/covers/back-rust-orange.svg",
   java: "/covers/back-java-offwhite.svg",
   "c++": "/covers/back-cpp-lightblue.svg",
   cpp: "/covers/back-cpp-lightblue.svg",
+  python: "/covers/default-cover.png",
 };
 
 type NormalizableBook = {
@@ -39,6 +41,8 @@ type NormalizableBook = {
 function normalizeBookPayload(input: NormalizableBook, bookID: string) {
     const parts = bookID.split("-");
     const langCode = parts[parts.length - 1];
+    const language = LANGUAGE_CODE_MAP[langCode] || null;
+    const resolvedCover = language ? BACK_COVER_COLOR_MAP[language] : "/covers/default-cover.png";
     return {
         _id: bookID,
         name: input?.name || "Untitled Book",
@@ -48,9 +52,9 @@ function normalizeBookPayload(input: NormalizableBook, bookID: string) {
         variant: input?.variant || "medium",
         tags: Array.isArray(input?.tags) ? input.tags : [],
         pages: Array.isArray(input?.pages) ? input.pages : [],
-        CoverImage: BACK_COVER_COLOR_MAP[LANGUAGE_CODE_MAP[langCode]] || "/covers/default-back.png",
-        BackcoverImage: BACK_COVER_COLOR_MAP[LANGUAGE_CODE_MAP[langCode]] || "/covers/default-back.png",
-        language: LANGUAGE_CODE_MAP[langCode] || null,
+        CoverImage: resolvedCover || "/covers/default-back.png",
+        BackcoverImage: resolvedCover || "/covers/default-back.png",
+        language,
     };
 }
 

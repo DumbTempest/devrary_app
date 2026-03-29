@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/custom/navbar";
@@ -66,6 +66,18 @@ export default function CreatePage() {
     const handleChange = (key: string, value: string) => {
         setForm((prev) => ({ ...prev, [key]: value }));
     };
+
+    const previewKey = useMemo(() => {
+        return JSON.stringify(
+            pages.map((page) => ({
+                title: page.title,
+                sections: page.sections.map((section) => ({
+                    type: section.type,
+                    content: section.content,
+                })),
+            }))
+        );
+    }, [pages]);
 
     const addPage = () => {
         setPages([
@@ -672,6 +684,7 @@ export default function CreatePage() {
 
             <div className="p-10 rounded-xl">
                 <FlipbookPreview
+                    key={previewKey}
                     data={{
                         name: form.name,
                         author: form.author,

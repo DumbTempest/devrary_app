@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/custom/navbar";
 import { FlipbookPreview } from "@/components/custom/flipbook_preview";
+import AnimatedSkyNoBirds from "@/components/custom/animated-sky-no-birds";
 
 export default function ApproveBooksPage() {
     const { data: session, status } = useSession();
@@ -75,8 +76,10 @@ export default function ApproveBooksPage() {
     };
 
     return (
-        <main className="min-h-screen bg-[#FAF3E1] p-10 font-tektur">
-            <Navbar />
+        <div className="relative min-h-screen w-full overflow-hidden">
+            <AnimatedSkyNoBirds />
+            <main className="relative min-h-screen p-10 font-tektur">
+                <Navbar />
 
             <div className="grid grid-cols-2 gap-10 mt-10">
 
@@ -149,7 +152,8 @@ export default function ApproveBooksPage() {
                     )}
                 </div>
 
-            </div>
-        </main>
+                </div>
+            </main>
+        </div>
     );
 }
