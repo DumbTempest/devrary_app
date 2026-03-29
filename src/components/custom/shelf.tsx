@@ -65,6 +65,11 @@ function makeRowBannerMesh(
     return mesh;
 }
 
+
+
+
+
+
 export default function Shelf({
     position,
     index,
@@ -377,16 +382,19 @@ export default function Shelf({
             >
                 <primitive object={clonedScene} scale={2} rotation={[0, Math.PI, 0]} />
                 <Text
-                    ref={textRef}
-                    position={[0, 2, 0]}
-                    fontSize={0.45}
-                    font="/fonts/Tektur-VariableFont_wdth,wght.ttf"
-                    color={labelColor}
-                    anchorX="center"
-                    anchorY="middle"
-                >
-                    {label}
-                </Text>
+  ref={textRef}
+  position={[0, 2, 0]}
+  fontSize={0.45}
+  font="/fonts/Tektur-VariableFont_wdth,wght.ttf"
+  color={labelColor} // keep original color
+  outlineWidth={0.02}
+  outlineColor="#000000" // black outline
+  material-toneMapped={false}
+  anchorX="center"
+  anchorY="middle"
+>
+  {label}
+</Text>
             </group>
         </group>
     );
