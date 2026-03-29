@@ -336,8 +336,7 @@ export default function CreatePage() {
                                 </label>
                                 <input
                                     title="meow"
-                                    value="My Awesome Book"
-                                    readOnly
+                                    placeholder="My Awesome Book"
                                     className="
         w-full px-4 py-3 text-sm font-semibold text-[#222]
         bg-[#FAF3E1] rounded-xl
@@ -404,8 +403,8 @@ export default function CreatePage() {
                                 </label>
                                 <input
                                     title="meow"
-                                    value="My Awesome Book"
-                                    readOnly
+                                    placeholder="My Awesome Book"
+                                    
                                     className="
         w-full px-4 py-3 text-sm font-semibold text-[#222]
         bg-[#FAF3E1] rounded-xl
