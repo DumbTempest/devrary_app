@@ -10,16 +10,21 @@ type PageSection =
       content: string | { src: string; title?: string };
     };
 
+// ✅ TYPE GUARD (FIX)
+function isAudioObject(
+  content: string | { src: string; title?: string }
+): content is { src: string; title?: string } {
+  return typeof content === "object" && content !== null && "src" in content;
+}
+
 const getYoutubeEmbedUrl = (url: string) => {
   try {
     const parsed = new URL(url);
 
-    // youtu.be/<id>
     if (parsed.hostname === "youtu.be") {
       return `https://www.youtube.com/embed/${parsed.pathname.slice(1)}`;
     }
 
-    // youtube.com/watch?v=<id>
     if (parsed.searchParams.get("v")) {
       return `https://www.youtube.com/embed/${parsed.searchParams.get("v")}`;
     }
@@ -111,15 +116,12 @@ const Page = React.forwardRef<
                 );
 
               case "audio": {
-                const isObject =
-                  typeof section.content === "object" &&
-                  section.content !== null;
-
-                const src = isObject
+                // ✅ Proper type narrowing
+                const src = isAudioObject(section.content)
                   ? section.content.src
                   : section.content;
 
-                const title = isObject
+                const title = isAudioObject(section.content)
                   ? section.content.title
                   : undefined;
 
